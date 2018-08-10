@@ -19,6 +19,7 @@
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
 
+
 function gf_sortable_categories_admin_scripts() {
     if (is_admin()) {
         wp_enqueue_style('jqueri-ui-css','//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
@@ -52,6 +53,13 @@ function gf_sortable_categories_options_page() {
     );
     $product_cats = get_terms( $args );
     $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
+    $fields_order_default = [];
+    foreach ($product_cats as $cat){
+        if ($cat->name != 'Uncategorized' && $cat->name != 'Gf-slider'){
+            $fields_order_default[] = (array)$cat;
+        }
+
+    }
 ?>
     <div class="wrap">
         <h2>Theme Options</h2>
@@ -64,13 +72,7 @@ function gf_sortable_categories_options_page() {
             <?php do_settings_sections( 'gf-sortable-categories-settings-group' ); ?>
 
             <?php
-            $fields_order_default = [];
-            foreach ($product_cats as $cat){
-                if ($cat->name != 'Uncategorized' && $cat->name != 'Gf-slider'){
-                    $fields_order_default[] = (array)$cat;
-                }
 
-            }
             ?>
 
 
