@@ -1,0 +1,51 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GF sortable categories\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-08-11 16:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/"
+
+#: gf-sortable-categories.php:81
+msgid "(Drag & drop to rearrange order)"
+msgstr ""
+
+#. Description of the plugin
+msgid "GF custom widgets"
+msgstr ""
+
+#. Name of the plugin
+msgid "GF sortable categories"
+msgstr ""
+
+#. Author of the plugin
+msgid "Green Friends"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://example.com"
+msgstr ""
+
+#. URI of the plugin
+msgid "https://example.com/plugin-name"
+msgstr ""
+
+#: gf-sortable-categories.php:119
+msgid "Number of categories on sidebar"
+msgstr ""
+
+#: gf-sortable-categories.php:81
+msgid "Sortable List"
+msgstr ""
+
+#: gf-sortable-categories.php:66
+msgid "Sorting categories options"
+msgstr ""

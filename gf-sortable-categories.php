@@ -14,12 +14,13 @@
  * Version:     1.0.0
  * Author:      Green Friends
  * Author URI:  https://example.com
- * Text Domain: plugin-name
+ * Text Domain: gf-sortable-categories
+ * Domain Path: /languages
  * License:     GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
 
-
+load_plugin_textdomain( 'gf-sortable-categories', '', plugins_url().'/gf-sortable-categories/languages' );
 function gf_sortable_categories_admin_scripts() {
     if (is_admin()) {
         wp_enqueue_style('jqueri-ui-css','//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
@@ -62,10 +63,10 @@ function gf_sortable_categories_options_page() {
     }
 ?>
     <div class="wrap">
-        <h2>Theme Options</h2>
+        <h2><?= _e('Sorting categories options', 'gf-sortable-categories')?></h2>
         <br/>
 
-        <?php settings_errors(); ?>
+        <?php settings_errors();?>
 
         <form method="post" action="options.php" id="theme-options-form">
             <?php settings_fields( 'gf-sortable-categories-settings-group' ); ?>
@@ -77,7 +78,7 @@ function gf_sortable_categories_options_page() {
 
 
             <div class="admin-module">
-                <label><b>Sortable List</b> <em>(Drag & drop to rearrange order)</em></label>
+                <label><b><?= _e('Sortable List','gf-sortable-categories')?> </b> <em><?= _e('(Drag & drop to rearrange order)', 'gf-sortable-categories')?></em></label>
                 <ul class="filter-fields-list">
                     <?php
                     $filter_fields_order = get_option('filter_fields_order', $fields_order_default);
@@ -115,7 +116,7 @@ function gf_sortable_categories_options_page() {
                         <?php endif;?>
                     <?php } ?>
                 </ul>
-                <label for="number_of_categories">Number of categories on sidebar</label>
+                <label for="number_of_categories"><?= _e('Number of categories on sidebar', 'gf-sortable-categories')?></label>
                 <input type="number" name="number_of_categories_in_sidebar" value="<?=$number_of_categories?>" />
 
             </div>
