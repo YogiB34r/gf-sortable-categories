@@ -1,0 +1,24 @@
+{
+    "name"        : "YogiB34r/gf-sortable-categories",
+    "description" : "desc",
+    "keywords"    : ["wordpress"],
+    "license"     : "GPL-2.0+",
+    "type"        : "wordpress-plugin",
+    "authors"     : [
+        {
+            "name"     : "YogiB34r",
+            "email"    : ""
+        },
+        {
+            "name"     : "IgorDjuric",
+            "email"    : ""
+        }
+    ],
+    "require"     : {
+        "composer/installers" : "^1.0",
+        "php"                 : ">=5.3.0"
+    },
+    "support"     : {
+        "issues": "https://github.com/YogiB34r/gf-sortable-categories/issues"
+    }
+}
