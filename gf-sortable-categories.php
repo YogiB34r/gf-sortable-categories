@@ -77,7 +77,7 @@ function gf_sortable_categories_options_page() {
             ?>
 
 
-            <div class="admin-module">
+            <div class="admin-module gf-sortable-categories-wrapper">
                 <label><b><?= _e('Sortable List','gf-sortable-categories')?> </b> <em><?= _e('(Drag & drop to rearrange order)', 'gf-sortable-categories')?></em></label>
                 <ul class="filter-fields-list">
                     <?php
