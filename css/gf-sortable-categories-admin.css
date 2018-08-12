@@ -17,3 +17,14 @@
     position: absolute;
     margin-left: -1.3em;
 }
+
+.gf-sortable-categories-wrapper .ui-sortable-handle{
+    border: 1px solid #ccc;
+    width: 15%;
+    padding: 10px;
+    background-color: #fafafa;
+}
+.gf-sortable-categories-wrapper .ui-sortable-handle:hover{
+    background-color: #ddd;
+    cursor: all-scroll;
+}
