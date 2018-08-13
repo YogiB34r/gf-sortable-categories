@@ -81,7 +81,11 @@ function gf_sortable_categories_options_page() {
                 <label><b><?= _e('Sortable List','gf-sortable-categories')?> </b> <em><?= _e('(Drag & drop to rearrange order)', 'gf-sortable-categories')?></em></label>
                 <ul class="filter-fields-list">
                     <?php
-                    $filter_fields_order = get_option('filter_fields_order', $fields_order_default);
+                    if(empty(get_option('filter_fields_order'))){
+                        $filter_fields_order = $fields_order_default;
+                    }else{
+                        $filter_fields_order = get_option('filter_fields_order');
+                    }
                     $saved_categories=[];
                     foreach ($filter_fields_order as $v){
                         $saved_categories[]= $v['term_id'];
