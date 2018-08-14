@@ -37,7 +37,7 @@ add_action('admin_menu', 'gf_sortable_categories_options_create_menu');
 function gf_sortable_categories_options_create_menu() {
 
     //create new top-level menu
-    add_menu_page('Sortable Categories', 'Sortable Categories Options', 'administrator', 'sortable_categories_options', 'gf_sortable_categories_options_page' , null, 99 );
+    add_menu_page('Sortable Categories', 'Opcije sortiranja kategorija', 'administrator', 'sortable_categories_options', 'gf_sortable_categories_options_page' , null, 99 );
 
     //call register settings function
     add_action( 'admin_init', 'register_gf_sortable_categories_options' );
@@ -63,7 +63,7 @@ function gf_sortable_categories_options_page() {
     }
 ?>
     <div class="wrap">
-        <h2><?= _e('Sorting categories options', 'gf-sortable-categories')?></h2>
+        <h2><?= _e('Opcije sortiranja kategorija', 'gf-sortable-categories')?></h2>
         <br/>
 
         <?php settings_errors();?>
@@ -78,7 +78,7 @@ function gf_sortable_categories_options_page() {
 
 
             <div class="admin-module gf-sortable-categories-wrapper">
-                <label><b><?= _e('Sortable List','gf-sortable-categories')?> </b> <em><?= _e('(Drag & drop to rearrange order)', 'gf-sortable-categories')?></em></label>
+                <label><b><?= __('Sortirajuća lista')?> </b> <em><?= __('(Postavite redosled kategorija prevlačenjem)')?></em></label>
                 <ul class="filter-fields-list">
                     <?php
                     if(empty(get_option('filter_fields_order'))){
@@ -120,7 +120,7 @@ function gf_sortable_categories_options_page() {
                         <?php endif;?>
                     <?php } ?>
                 </ul>
-                <label for="number_of_categories"><?= _e('Number of categories on sidebar', 'gf-sortable-categories')?></label>
+                <label for="number_of_categories"><?= __('Broj kategorija koje će biti prikazane na bočnom meniju')?></label>
                 <input type="number" name="number_of_categories_in_sidebar" value="<?=$number_of_categories?>" />
 
             </div>
