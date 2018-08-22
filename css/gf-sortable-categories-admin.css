@@ -16,7 +16,6 @@
 }
 .sortable-item {
     border: 1px solid #ccc;
-    width: 35%;
     padding: 10px;
 }
 #sortable li span {

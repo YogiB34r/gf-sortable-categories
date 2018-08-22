@@ -87,8 +87,6 @@ function gf_sortable_categories_options_page()
             <?php
 
             ?>
-
-
             <div class="admin-module gf-sortable-categories-wrapper">
                 <label><b><?= __('Sortirajuća lista') ?> </b>
                     <em><?= __('(Postavite redosled kategorija prevlačenjem)') ?></em></label>
