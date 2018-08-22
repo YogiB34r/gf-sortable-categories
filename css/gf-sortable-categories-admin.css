@@ -4,7 +4,9 @@
     padding: 0;
     width: 60%;
 }
-
+.gf-sortable-categories-wrapper{
+    list-style: none;
+}
 #sortable li {
     margin: 0 3px 3px 3px;
     padding: 0.4em;
@@ -12,19 +14,25 @@
     font-size: 1.4em;
     height: 18px;
 }
-
+.sortable-item {
+    border: 1px solid #ccc;
+    width: 35%;
+    padding: 10px;
+}
 #sortable li span {
     position: absolute;
     margin-left: -1.3em;
 }
 
-.gf-sortable-categories-wrapper .ui-sortable-handle{
+.gf-sortable-categories-wrapper .sortable-list{
     border: 1px solid #ccc;
     width: 15%;
     padding: 10px;
-    background-color: #fafafa;
 }
 .gf-sortable-categories-wrapper .ui-sortable-handle:hover{
     background-color: #ddd;
     cursor: all-scroll;
+}
+.sub-cat {
+    margin-left: 10px;
 }
