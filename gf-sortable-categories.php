@@ -57,23 +57,59 @@ function register_gf_sortable_categories_options()
 
 function gf_sortable_categories_options_page()
 {
+    $gf_slider_id = '';
+    if (get_term_by('slug', 'gf-slider', 'product_cat')) {
+        $gf_slider_id = get_term_by('slug', 'gf-slider', 'product_cat')->term_id;
+    }
     $args = array(
-        'orderby' => 'term_group',
+        'orderby' => 'term_id',
         'order' => 'asc',
         'hide_empty' => false,
-        'exclude_tree' => get_term_by('slug', 'gf-slider', 'product_cat')->term_id,
+        'exclude_tree' => $gf_slider_id
     );
     $product_cats = get_terms('product_cat', $args);
     $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     $fields_order_default = [];
     $i = 0;
     foreach ($product_cats as $cat) {
-        if ($cat->name != 'Uncategorized' && $cat->name != 'Gf slider') {
-            $fields_order_default[] = (array)$cat;
+        $fields_order_default[] = (array)$cat;
+    } ?>
+    <?php
+    foreach (gf_get_top_level_categories($gf_slider_id) as $cat) {
+        if (empty(get_term_children($cat->term_id, 'product_cat'))) {
+            var_dump($cat);
+        } else {
+            var_dump($cat);
+            foreach (get_term_children($cat->term_id, 'product_cat') as $second_level_cat) {
+                if (gf_check_level_of_category($second_level_cat) == 2) {
+                    if (empty(get_term_children($second_level_cat, 'product_cat'))) {
+                        var_dump(get_term($second_level_cat, 'product_cat'));
+                    } else {
+                        foreach (get_term_children($second_level_cat, 'product_cat') as $third_level_cat) {
+                            var_dump(get_term($third_level_cat, 'product_cat'));
+                        }
+                    }
+                }
+            }
         }
-
     }
-    ?>
+//    $child_ids = get_term_children($cat->term_id, 'product_cat');
+//    foreach ($child_ids as $child_id) {
+//        if (gf_check_level_of_category($child_id) == 2) {
+//            if (empty(get_term_children($child_id, 'product_cat'))) {
+//                var_dump(get_term($child_id));
+//            } else {
+//                var_dump(get_term($child_id));
+//                foreach (get_term_children($child_id, 'product_cat') as $third_level) {
+//                    var_dump($third_level);
+//                }
+//            }
+//        }
+//
+//    }
+//}
+
+?>
     <div class="wrap">
         <h2><?= _e('Opcije sortiranja kategorija', 'gf-sortable-categories') ?></h2>
         <br/>
@@ -83,10 +119,6 @@ function gf_sortable_categories_options_page()
         <form method="post" action="options.php" id="theme-options-form">
             <?php settings_fields('gf-sortable-categories-settings-group'); ?>
             <?php do_settings_sections('gf-sortable-categories-settings-group'); ?>
-
-            <?php
-
-            ?>
             <div class="admin-module gf-sortable-categories-wrapper">
                 <label><b><?= __('Sortirajuća lista') ?> </b>
                     <em><?= __('(Postavite redosled kategorija prevlačenjem)') ?></em></label>
@@ -116,22 +148,23 @@ function gf_sortable_categories_options_page()
                     }
 
                     foreach ($filter_fields_order as $value) {
-                    if (in_array($value['term_id'], $saved_categories_db)) {
-                        $id = $value['term_id'];
-                        $name = get_term($id)->name;
-                        $parent = get_term($id)->parent;
-                    }?>
-                <?php if (isset($name) and isset($id)):$i++?>
-                    <?php require(realpath(__DIR__ . '/template-parts/gf-categories.php'))?>
-                <?php endif;?>
-                        <?php }//foreach ?>
+                        if (in_array($value['term_id'], $saved_categories_db)) {
+                            $id = $value['term_id'];
+                            $name = get_term($id)->name;
+                            $parent = get_term($id)->parent;
+                        }; ?>
+                        <?php if (isset($name) and isset($id)):$i++ ?>
+                            <?php require(realpath(__DIR__ . '/template-parts/gf-categories.php')) ?>
+                        <?php endif; ?>
+                    <?php }//foreach
+                    ?>
                 </ul>
             </div><!--gf-sortable-categories-wrapper-->
-                        <label for="number_of_categories"><?= __('Broj kategorija koje će biti prikazane na bočnom meniju') ?></label>
-                        <input type="number" name="number_of_categories_in_sidebar"
-                               value="<?= $number_of_categories ?>"/>
-                    <?php submit_button(); ?>
+            <label for="number_of_categories"><?= __('Broj kategorija koje će biti prikazane na bočnom meniju') ?></label>
+            <input type="number" name="number_of_categories_in_sidebar"
+                   value="<?= $number_of_categories ?>"/>
+            <?php submit_button(); ?>
         </form>
     </div> <!--WRAP-->
-    <?php
+<?php
 }
