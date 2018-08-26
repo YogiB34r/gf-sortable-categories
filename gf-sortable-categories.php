@@ -61,14 +61,11 @@ function gf_sortable_categories_options_page()
     if (get_term_by('slug', 'gf-slider', 'product_cat')) {
         $gf_slider_id = get_term_by('slug', 'gf-slider', 'product_cat')->term_id;
     }
-    $args = array(
-        'orderby' => 'term_id',
-        'order' => 'asc',
-        'hide_empty' => false,
-        'exclude_tree' => $gf_slider_id
-    );
-    $product_cats = [];
-    foreach (gf_get_top_level_categories($gf_slider_id) as $cat) {
+    $uncategorized_id = '';
+    if (get_term_by('slug', 'uncategorized', 'product_cat')) {
+        $uncategorized_id = get_term_by('slug', 'gf-slider', 'product_cat')->term_id;
+    }
+    foreach (gf_get_top_level_categories($gf_slider_id,$uncategorized_id) as $cat) {
         if (empty(get_term_children($cat->term_id, 'product_cat'))) {
             $product_cats[] = $cat;
         } else {
@@ -138,7 +135,7 @@ function gf_sortable_categories_options_page()
                             $id = $value['term_id'];
                             $name = get_term($id)->name;
                             $parent = get_term($id)->parent;
-                        }; ?>
+                        };?>
                         <?php if (isset($name) and isset($id)):$all++ ?>
                             <?php require(realpath(__DIR__ . '/template-parts/gf-categories.php')) ?>
                         <?php endif; ?>
