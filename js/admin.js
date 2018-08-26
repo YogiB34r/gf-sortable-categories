@@ -17,32 +17,22 @@ jQuery(document).ready(function ($) {
         });
         return false;
     });
-
     /********************************************/
     /* SORTABLE FILTER FIELDS */
     /********************************************/
-    $('.sortable-item').mouseover(function () {
-        $(this).find('.sort-arrows').stop(true, true).show();
-    });
-    $('.sortable-item').mouseout(function () {
-        $(this).find('.sort-arrows').stop(true, true).hide();
-    });
-
     $('.filter-fields-list').sortable({
+        handle: ".first-level-cat",
         axis: 'y',
-        curosr: 'move'
+        cursor: 'move'
     });
-    $('.sortable-list').sortable({
-        connectWith: $('.sortable-list')
-    });
-
-    $('.property-detail-items-list').sortable({
+    $('.parent-cat-children').sortable({
+        handle: ".second-level-cat",
         axis: 'y',
-        curosr: 'move'
+        cursor: 'move',
     });
-
-    $('.agent-detail-items-list').sortable({
+    $('.child-cat-children').sortable({
+        handle: ".third-level-cat",
         axis: 'y',
-        curosr: 'move'
+        cursor: 'move',
     });
 });

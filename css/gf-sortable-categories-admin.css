@@ -1,37 +1,34 @@
-#sortable {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    width: 60%;
+.filter-fields-list .parent-cat {
+    border: 1px solid #ccc;
+    max-width: 30%;
+    margin-bottom: 20px;
 }
-.gf-sortable-categories-wrapper{
-    list-style: none;
+.filter-fields-list .child-cat,h5{
+    border: 1px solid #ccc;
+}
+.filter-fields-list{
+    text-align: center;
+}
+.filter-fields-list .child-cat,h5{
+    margin: 10px 40px;
 }
 #sortable li {
-    margin: 0 3px 3px 3px;
     padding: 0.4em;
     padding-left: 1.5em;
     font-size: 1.4em;
     height: 18px;
 }
+
 .sortable-item {
     border: 1px solid #ccc;
     padding: 10px;
 }
-#sortable li span {
-    position: absolute;
-    margin-left: -1.3em;
+.gf-sortable-categories-wrapper h2:hover,h3:hover,h4:hover,h5:hover {
+    cursor: pointer;
 }
-
-.gf-sortable-categories-wrapper .sortable-list{
-    border: 1px solid #ccc;
-    width: 20%;
-    padding: 20px;
+.gf-sortable-categories-wrapper h2:hover .child-cat{
+    background-color: #DDDDDD;
 }
-.gf-sortable-categories-wrapper .ui-sortable-handle:hover{
-    background-color: #ddd;
-    cursor: all-scroll;
-}
-.sub-cat {
-    margin-left: 10px;
+.gf-sortable-categories-wrapper h2:hover + .parent-cat {
+    background: #DDDDDD
 }
