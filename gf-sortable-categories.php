@@ -86,10 +86,11 @@ function gf_sortable_categories_options_page()
     }
     $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     $fields_order_default = [];
-    $c = 0;//counter for second level categories
-    $all = 0;//counter for all categories
-    $cc = 0;//counter for childs of second level category
     $pc = 0;//counter for childs of parent category
+    $c = 0;//counter for second level categories
+    $cc = 0;//counter for childs of second level category
+    $all = 0;//counter for all categories
+
     foreach ($product_cats as $cat) {
         $fields_order_default[] = (array)$cat;
     }?>
