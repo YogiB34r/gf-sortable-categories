@@ -84,12 +84,15 @@ function gf_sortable_categories_options_page()
             }
         }
     }
-    $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
+    $number_of_categories = 24;
+    if (isset(get_option('number_of_categories_in_sidebar')) && !empty (get_option('number_of_categories_in_sidebar'))){
+        $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
+    }
+
     $fields_order_default = [];
     $pc = 0;//counter for childs of parent category
     $c = 0;//counter for second level categories
     $cc = 0;//counter for childs of second level category
-    $all = 0;//counter for all categories
 
     foreach ($product_cats as $cat) {
         $fields_order_default[] = (array)$cat;
@@ -137,7 +140,7 @@ function gf_sortable_categories_options_page()
                             $name = get_term($id)->name;
                             $parent = get_term($id)->parent;
                         };?>
-                        <?php if (isset($name) and isset($id)):$all++ ?>
+                        <?php if (isset($name) and isset($id)): ?>
                             <?php require(realpath(__DIR__ . '/template-parts/gf-categories.php')) ?>
                         <?php endif; ?>
                     <?php }//foreach
