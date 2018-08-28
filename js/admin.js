@@ -21,7 +21,7 @@ jQuery(document).ready(function ($) {
     /* SORTABLE FILTER FIELDS */
     /********************************************/
     $('.filter-fields-list').sortable({
-        handle: ".first-level-cat",
+        // handle: ".first-level-cat",
         axis: 'y',
         cursor: 'move'
     });

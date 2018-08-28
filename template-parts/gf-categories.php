@@ -26,7 +26,7 @@ if (gf_check_level_of_category($id) == 2) {
 }
 if (gf_check_level_of_category($id) == 3):$cc++;$pc++;?>
     <li class="third-level-cat">
-        <?= '<h5>'.$name.'</h5>' ?>
+        <?= '<h5 class="childs-of-child-header third-level-cat">'.$name.'</h5>' ?>
         <input type="hidden" name="filter_fields_order[<?php echo $id; ?>][term_id]"
                value="<?php echo $id; ?>"/>
         <input type="hidden" name="filter_fields_order[<?php echo $id; ?>][name]"
