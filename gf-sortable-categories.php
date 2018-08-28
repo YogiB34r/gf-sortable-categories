@@ -85,7 +85,7 @@ function gf_sortable_categories_options_page()
         }
     }
     $number_of_categories = 24;
-    if (isset(get_option('number_of_categories_in_sidebar')) && !empty (get_option('number_of_categories_in_sidebar'))){
+    if (!empty(get_option('number_of_categories_in_sidebar'))){
         $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     }
 
