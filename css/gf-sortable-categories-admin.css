@@ -1,10 +1,10 @@
 .filter-fields-list .parent-cat {
-    border: 1px solid #ccc;
     max-width: 30%;
     margin-bottom: 20px;
 }
-.filter-fields-list .child-cat,h5{
-    border: 1px solid #ccc;
+.parent-header, .child-header, .childs-of-child-header {
+    background-color: #1C2336!important;
+    color: white!important;
 }
 .filter-fields-list{
     text-align: center;
@@ -12,23 +12,17 @@
 .filter-fields-list .child-cat,h5{
     margin: 10px 40px;
 }
-#sortable li {
-    padding: 0.4em;
-    padding-left: 1.5em;
-    font-size: 1.4em;
-    height: 18px;
-}
-
-.sortable-item {
-    border: 1px solid #ccc;
-    padding: 10px;
-}
 .gf-sortable-categories-wrapper h2:hover,h3:hover,h4:hover,h5:hover {
     cursor: pointer;
 }
-.gf-sortable-categories-wrapper h2:hover .child-cat{
-    background-color: #DDDDDD;
+.parent-cat-children, .child-cat-children{
+    background-color: #E7E7E7;
+    border: 2px solid #FE7725 !important;
 }
-.gf-sortable-categories-wrapper h2:hover + .parent-cat {
-    background: #DDDDDD
+.ui-state-active , .childs-of-child-header{
+    background-color: #FE7725!important;
+    border: none!important;
+}
+.ui-icon {
+    float: right;
 }

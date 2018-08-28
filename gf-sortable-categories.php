@@ -31,6 +31,8 @@ function gf_sortable_categories_admin_scripts()
         wp_enqueue_script('jquery-ui-widget');
         wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_script('jquery-ui-accordion');
+        wp_enqueue_style('gf-sortable-categories-admin-css', plugins_url() . '/gf-sortable-categories/css/gf-sortable-categories-admin.css');
+
 
     }
 }
@@ -65,7 +67,7 @@ function gf_sortable_categories_options_page()
     if (get_term_by('slug', 'uncategorized', 'product_cat')) {
         $uncategorized_id = get_term_by('slug', 'gf-slider', 'product_cat')->term_id;
     }
-    foreach (gf_get_top_level_categories($gf_slider_id,$uncategorized_id) as $cat) {
+    foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
         if (empty(get_term_children($cat->term_id, 'product_cat'))) {
             $product_cats[] = $cat;
         } else {
@@ -85,7 +87,7 @@ function gf_sortable_categories_options_page()
         }
     }
     $number_of_categories = 24;
-    if (!empty(get_option('number_of_categories_in_sidebar'))){
+    if (!empty(get_option('number_of_categories_in_sidebar'))) {
         $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     }
 
@@ -96,7 +98,7 @@ function gf_sortable_categories_options_page()
 
     foreach ($product_cats as $cat) {
         $fields_order_default[] = (array)$cat;
-    }?>
+    } ?>
     <div class="wrap">
         <h2><?= _e('Opcije sortiranja kategorija', 'gf-sortable-categories') ?></h2>
         <br/>
@@ -139,7 +141,7 @@ function gf_sortable_categories_options_page()
                             $id = $value['term_id'];
                             $name = get_term($id)->name;
                             $parent = get_term($id)->parent;
-                        };?>
+                        }; ?>
                         <?php if (isset($name) and isset($id)): ?>
                             <?php require(realpath(__DIR__ . '/template-parts/gf-categories.php')) ?>
                         <?php endif; ?>
