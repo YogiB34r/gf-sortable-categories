@@ -60,12 +60,12 @@ function register_gf_sortable_categories_options()
 function gf_sortable_categories_options_page()
 {
     $gf_slider_id = '';
-    if (get_term_by('slug', 'gf-slider', 'product_cat')) {
-        $gf_slider_id = get_term_by('slug', 'gf-slider', 'product_cat')->term_id;
+    if (get_term_by('slug', 'specijalne-promocije', 'product_cat')) {
+        $gf_slider_id = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
     }
     $uncategorized_id = '';
     if (get_term_by('slug', 'uncategorized', 'product_cat')) {
-        $uncategorized_id = get_term_by('slug', 'gf-slider', 'product_cat')->term_id;
+        $uncategorized_id = get_term_by('slug', 'uncategorized', 'product_cat')->term_id;
     }
     foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
         if (empty(get_term_children($cat->term_id, 'product_cat'))) {
