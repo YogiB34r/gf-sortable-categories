@@ -155,7 +155,7 @@ function gf_sortable_categories_options_page()
             <label for="number_of_categories"><?= __('Broj kategorija koje će biti prikazane na bočnom meniju') ?></label>
             <input type="number" name="number_of_categories_in_sidebar"
                    value="<?= $number_of_categories ?>"/>
-            <?php submit_button(); ?>
+            <?php submit_button('','primary','gf-sortable-categories'); ?>
         </form>
     </div><!--WRAP-->
     <?php
