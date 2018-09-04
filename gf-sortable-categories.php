@@ -173,3 +173,113 @@ function gf_sortable_categories_options_page()
     </script>
     <?php
 }
+// Category sidebar
+add_shortcode('gf-category-megamenu', 'gf_category_megamenu_shortcode');
+function gf_category_megamenu_shortcode()
+{
+    $key = 'gf-megamenu';
+//    $group = 'gf-sidebar-static';
+    $redis = new Redis();
+    $redis->connect('127.0.0.1');
+//    $html = wp_cache_get($key, $group);
+    $html = $redis->get($key);
+    if ($html === false) {
+        ob_start();
+        printMegaMenu();
+        $html = ob_get_clean();
+//        wp_cache_set($key, $html, $group, 300);
+        $redis->set($key, $html, 60 * 60); // 1 hour
+    }
+    echo $html;
+
+
+}
+
+/**
+ * Prints out mega menu with categories
+ */
+function printMegaMenu() {
+    $gf_slider_id = '';
+    if (get_term_by('slug', 'specijalne-promocije', 'product_cat')) {
+        $gf_slider_id = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
+    }
+    $uncategorized_id = '';
+    if (get_term_by('slug', 'uncategorized', 'product_cat')) {
+        $uncategorized_id = get_term_by('slug', 'uncategorized', 'product_cat')->term_id;
+    }
+    $product_cats = [];
+    $number_of_categories = 24;
+    if (!empty(get_option('filter_fields_order'))) {
+        $product_cats_array = get_option('filter_fields_order');
+        foreach ($product_cats_array as $product_cat) {
+            $product_cats[] = get_term($product_cat['term_id']);
+        }
+        $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
+    } else{
+        foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
+            if (empty(get_term_children($cat->term_id, 'product_cat'))) {
+                $product_cats[] = $cat;
+            } else {
+                $product_cats[] = $cat;
+                foreach (get_term_children($cat->term_id, 'product_cat') as $second_level_cat) {
+                    if (gf_check_level_of_category($second_level_cat) == 2) {
+                        if (empty(get_term_children($second_level_cat, 'product_cat'))) {
+                            $product_cats[] = get_term($second_level_cat, 'product_cat');
+                        } else {
+                            $product_cats[] = get_term($second_level_cat, 'product_cat');
+                            foreach (get_term_children($second_level_cat, 'product_cat') as $third_level_cat) {
+                                $product_cats[] = get_term($third_level_cat, 'product_cat');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    $i = 0;
+    $c = 0;
+    $pcc = 0;
+    echo
+    '<div id="gf-wrapper">
+	     <div class="gf-sidebar">
+		     <div class="gf-toggle"><i class="fa fa-bars"></i></div>
+		       <div class="gf-navblock">';
+    if ($i <= $number_of_categories) {
+        foreach ($product_cats as $cat) {
+            if ($cat->parent == 0) {
+                $parent_children_count = count(get_term_children($cat->term_id,'product_cat'));
+                $i++;
+                require(realpath(__DIR__ . '/../templates/template-parts/category-megamenu/first-level.php'));
+            }
+            if (gf_check_level_of_category($cat->term_id) == 2) {
+                $child_count = count(get_term_children($cat->term_id, 'product_cat'));
+                require(realpath(__DIR__ . '/../templates/template-parts/category-megamenu/second-level.php'));
+                $pcc++;
+            }
+            if (gf_check_level_of_category($cat->term_id) == 3) {
+                require(realpath(__DIR__ . '/../templates/template-parts/category-megamenu/third-level.php'));
+                $c++;
+                $pcc++;
+            }
+
+            if (gf_check_level_of_category($cat->term_id) == 3 || gf_check_level_of_category($cat->term_id) == 2) {
+                if ($c == $child_count) {
+                    echo '</ol>
+                                    </div>';
+                    $c = 0;
+                }
+            }
+            if ($pcc == $parent_children_count){
+                echo '</div>
+                    </div>
+                </li>
+            </ul>';
+                $pcc=0;
+            }
+        }
+
+    }
+    echo '</div>
+	</div>
+</div>';
+}
