@@ -32,8 +32,6 @@ function gf_sortable_categories_admin_scripts()
         wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_script('jquery-ui-accordion');
         wp_enqueue_style('gf-sortable-categories-admin-css', plugins_url() . '/gf-sortable-categories/css/gf-sortable-categories-admin.css');
-
-
     }
 }
 
@@ -43,7 +41,6 @@ add_action('admin_menu', 'gf_sortable_categories_options_create_menu');
 
 function gf_sortable_categories_options_create_menu()
 {
-
     //create new top-level menu
     add_menu_page('Sortable Categories', 'Opcije sortiranja kategorija', 'administrator', 'sortable_categories_options', 'gf_sortable_categories_options_page', null, 99);
 
@@ -55,6 +52,12 @@ function register_gf_sortable_categories_options()
 {
     register_setting('gf-sortable-categories-settings-group', 'filter_fields_order');
     register_setting('gf-sortable-categories-settings-group', 'number_of_categories_in_sidebar');
+}
+function gf_clear_megamenu_cache(){
+    $key = 'gf-megamenu';
+    $redis = new Redis();
+    $redis->connect('127.0.0.1');
+    $redis->del($key);
 }
 
 function gf_sortable_categories_options_page()
