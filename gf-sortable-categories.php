@@ -53,7 +53,9 @@ function register_gf_sortable_categories_options()
     register_setting('gf-sortable-categories-settings-group', 'filter_fields_order');
     register_setting('gf-sortable-categories-settings-group', 'number_of_categories_in_sidebar');
 }
-function gf_clear_megamenu_cache(){
+
+function gf_clear_megamenu_cache()
+{
     $key = 'gf-megamenu';
     $redis = new Redis();
     $redis->connect('127.0.0.1');
@@ -155,8 +157,19 @@ function gf_sortable_categories_options_page()
             <label for="number_of_categories"><?= __('Broj kategorija koje će biti prikazane na bočnom meniju') ?></label>
             <input type="number" name="number_of_categories_in_sidebar"
                    value="<?= $number_of_categories ?>"/>
-            <?php submit_button('','primary','gf-sortable-categories'); ?>
+            <?php submit_button('', 'primary', 'gf-sortable-categories'); ?>
         </form>
     </div><!--WRAP-->
+    <script type="text/javascript">
+        $('#theme-options-form').submit(function (e) {
+                e.preventDefault(); // don't submit multiple times
+                this.submit(); // use the native submit method of the form element
+                setTimeout(function () {
+                    <?php gf_clear_megamenu_cache() ?>
+                    console.log('radi');
+                }, 100);
+            },
+        )
+    </script>
     <?php
 }
