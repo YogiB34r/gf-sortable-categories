@@ -253,7 +253,7 @@ function printMegaMenu() {
             }
             if (gf_check_level_of_category($cat->term_id) == 2) {
                 $child_count = count(get_term_children($cat->term_id, 'product_cat'));
-                require(realpath(__DIR__ . '=/template-parts/category-megamenu/second-level.php'));
+                require(realpath(__DIR__ . '/template-parts/category-megamenu/second-level.php'));
                 $pcc++;
             }
             if (gf_check_level_of_category($cat->term_id) == 3) {
