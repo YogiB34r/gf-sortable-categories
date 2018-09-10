@@ -185,7 +185,6 @@ function gf_category_megamenu_shortcode()
     $redis->connect('127.0.0.1');
 //    $html = wp_cache_get($key, $group);
     $html = $redis->get($key);
-    $html = false;
     if ($html === false) {
         ob_start();
         printMegaMenu();
