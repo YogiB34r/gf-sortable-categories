@@ -217,20 +217,22 @@ function printMegaMenu() {
         foreach ($product_cats_array as $product_cat) {
             $product_cats[] = get_term($product_cat['term_id']);
         }
-        $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
+//        $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     } else{
         foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
-            if (empty(get_term_children($cat->term_id, 'product_cat'))) {
+            $catTermChildren = get_term_children($cat->term_id, 'product_cat');
+            if (empty($catTermChildren)) {
                 $product_cats[] = $cat;
             } else {
                 $product_cats[] = $cat;
-                foreach (get_term_children($cat->term_id, 'product_cat') as $second_level_cat) {
+                foreach ($catTermChildren as $second_level_cat) {
                     if (gf_check_level_of_category($second_level_cat) == 2) {
-                        if (empty(get_term_children($second_level_cat, 'product_cat'))) {
+                        $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
+                        if (empty($secondCatTermChildren)) {
                             $product_cats[] = get_term($second_level_cat, 'product_cat');
                         } else {
                             $product_cats[] = get_term($second_level_cat, 'product_cat');
-                            foreach (get_term_children($second_level_cat, 'product_cat') as $third_level_cat) {
+                            foreach ($secondCatTermChildren as $third_level_cat) {
                                 $product_cats[] = get_term($third_level_cat, 'product_cat');
                             }
                         }
