@@ -194,8 +194,6 @@ function gf_category_megamenu_shortcode()
         $redis->set($key, $html, 60 * 60); // 1 hour
     }
     echo $html;
-
-
 }
 
 /**
@@ -220,6 +218,9 @@ function printMegaMenu() {
 //        $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     } else{
         foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
+            if ($cat->term_id === 3152) {
+                continue;
+            }
             $catTermChildren = get_term_children($cat->term_id, 'product_cat');
             if (empty($catTermChildren)) {
                 $product_cats[] = $cat;
