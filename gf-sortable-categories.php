@@ -127,7 +127,17 @@ function gf_sortable_categories_options_page()
                         $filter_fields_order = $fields_order_default;
                     } else {
                         $filter_fields_order_db = get_option('filter_fields_order');
-                        foreach ($filter_fields_order_db as $value) {
+                        foreach ($fields_order_default as $key => $value2) {
+                            $termFound = false;
+                            foreach ($filter_fields_order_db as $value) {
+                                if ($value['term_id'] === $value2['term_id']) {
+                                    $termFound = true;
+                                }
+                            }
+                            if (!$termFound) {
+                                $filter_fields_order[] = (array)get_term($value2['term_id'], 'product_cat');
+                                continue;
+                            }
                             $filter_fields_order[] = (array)get_term($value['term_id'], 'product_cat');
                         }
                     }
