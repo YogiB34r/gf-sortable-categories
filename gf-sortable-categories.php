@@ -65,25 +65,27 @@ function gf_clear_megamenu_cache()
 function gf_sortable_categories_options_page()
 {
     $gf_slider_id = '';
-    if (get_term_by('slug', 'specijalne-promocije', 'product_cat')) {
-        $gf_slider_id = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
+    $sliderCat = get_term_by('slug', 'specijalne-promocije', 'product_cat');
+    if ($sliderCat) {
+        $gf_slider_id = $sliderCat->term_id;
     }
     $uncategorized_id = '';
-    if (get_term_by('slug', 'uncategorized', 'product_cat')) {
-        $uncategorized_id = get_term_by('slug', 'uncategorized', 'product_cat')->term_id;
+    $uncategorizedCat = get_term_by('slug', 'uncategorized', 'product_cat');
+    if ($uncategorizedCat) {
+        $uncategorized_id = $uncategorizedCat->term_id;
     }
     foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
-        if (empty(get_term_children($cat->term_id, 'product_cat'))) {
+        $catTermChildren = get_term_children($cat->term_id, 'product_cat');
+        if (empty($catTermChildren)) {
             $product_cats[] = $cat;
         } else {
             $product_cats[] = $cat;
-            foreach (get_term_children($cat->term_id, 'product_cat') as $second_level_cat) {
+            foreach ($catTermChildren as $second_level_cat) {
                 if (gf_check_level_of_category($second_level_cat) == 2) {
-                    if (empty(get_term_children($second_level_cat, 'product_cat'))) {
-                        $product_cats[] = get_term($second_level_cat, 'product_cat');
-                    } else {
-                        $product_cats[] = get_term($second_level_cat, 'product_cat');
-                        foreach (get_term_children($second_level_cat, 'product_cat') as $third_level_cat) {
+                    $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
+                    $product_cats[] = get_term($second_level_cat, 'product_cat');
+                    if (!empty($secondCatTermChildren)) {
+                        foreach ($secondCatTermChildren as $third_level_cat) {
                             $product_cats[] = get_term($third_level_cat, 'product_cat');
                         }
                     }
@@ -183,6 +185,7 @@ function gf_category_megamenu_shortcode()
     $redis->connect('127.0.0.1');
 //    $html = wp_cache_get($key, $group);
     $html = $redis->get($key);
+    $html = false;
     if ($html === false) {
         ob_start();
         printMegaMenu();
