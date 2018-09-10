@@ -4,10 +4,6 @@
     <li class="parent-cat accordion-first-level">
     <input type="hidden" name="filter_fields_order[<?= $id ?>][term_id]"
            value="<?= $id ?>"/>
-    <input type="hidden" name="filter_fields_order[<?= $id ?>][name]"
-           value="<?= $name ?>"/>
-    <input type="hidden" name="filter_fields_order[<?= $id ?>][parent]"
-           value="<?= $parent ?>"/>
     <h2 class="parent-header first-level-cat"><?= $name ?></h2>
     <?php if ($parent_children_count != 0) {
     echo '<ul class="parent-cat-children">';
@@ -23,10 +19,6 @@ if (gf_check_level_of_category($id) == 2):
     <li class="child-cat accordion-second-level">
     <input type="hidden" name="filter_fields_order[<?= $id ?>][term_id]"
            value="<?= $id ?>"/>
-    <input type="hidden" name="filter_fields_order[<?= $id ?>][name]"
-           value="<?= $name ?>"/>
-    <input type="hidden" name="filter_fields_order[<?= $id ?>][parent]"
-           value="<?= $parent ?>"/>
     <h4 class="child-header second-level-cat"><?= $name ?></h4>
     <?php if ($children_count != 0) {
     echo '<ul class="child-cat-children">';
@@ -40,10 +32,6 @@ if (gf_check_level_of_category($id) == 3):
     <li class="third-level-cat">
         <input type="hidden" name="filter_fields_order[<?= $id ?>][term_id]"
                value="<?= $id ?>"/>
-        <input type="hidden" name="filter_fields_order[<?= $id ?>][name]"
-               value="<?= $name ?>"/>
-        <input type="hidden" name="filter_fields_order[<?= $id ?>][parent]"
-               value="<?= $parent ?>"/>
         <h5 class="childs-of-child-header third-level-cat"><?= $name ?></h5>
     </li>
 <?php endif;

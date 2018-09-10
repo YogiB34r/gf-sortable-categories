@@ -75,6 +75,9 @@ function gf_sortable_categories_options_page()
         $uncategorized_id = $uncategorizedCat->term_id;
     }
     foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
+        if ($cat->term_id === 3152) {
+            continue;
+        }
         $catTermChildren = get_term_children($cat->term_id, 'product_cat');
         if (empty($catTermChildren)) {
             $product_cats[] = $cat;
@@ -123,33 +126,16 @@ function gf_sortable_categories_options_page()
                     if (empty(get_option('filter_fields_order'))) {
                         $filter_fields_order = $fields_order_default;
                     } else {
-                        $filter_fields_order = get_option('filter_fields_order');
-                    }
-                    $saved_categories = [];
-                    foreach ($filter_fields_order as $v) {
-                        $saved_categories[] = $v['term_id'];
-                    }
-                    foreach ($fields_order_default as $category) {
-                        if (!in_array($category['term_id'], $saved_categories)) {
-                            $filter_fields_order[] = array(
-                                'term_id' => $category['term_id'],
-                                'name' => $category['name'],
-                                'parent' => $category['parent']
-                            );
+                        $filter_fields_order_db = get_option('filter_fields_order');
+                        foreach ($filter_fields_order_db as $value) {
+                            $filter_fields_order[] = (array)get_term($value['term_id'], 'product_cat');
                         }
                     }
-                    $saved_categories_db = [];
-                    foreach ($fields_order_default as $v) {
-                        $saved_categories_db[] = $v['term_id'];
-                    }
-
                     foreach ($filter_fields_order as $value) {
-                        if (in_array($value['term_id'], $saved_categories_db)) {
-                            $id = $value['term_id'];
-                            $name = get_term($id)->name;
-                            $parent = get_term($id)->parent;
-                        }; ?>
-                        <?php if (isset($name) and isset($id)): ?>
+                        $id = $value['term_id'];
+                        $parent = $value['parent'];
+                        $name = $value['name'];
+                        if (isset($id)): ?>
                             <?php require(realpath(__DIR__ . '/template-parts/gf-categories.php')) ?>
                         <?php endif; ?>
                     <?php }//foreach
@@ -168,13 +154,13 @@ function gf_sortable_categories_options_page()
                 this.submit(); // use the native submit method of the form element
                 setTimeout(function () {
                     <?php gf_clear_megamenu_cache() ?>
-                    console.log('radi');
                 }, 100);
             },
         )
     </script>
     <?php
 }
+
 // Category sidebar
 add_shortcode('gf-category-megamenu', 'gf_category_megamenu_shortcode');
 function gf_category_megamenu_shortcode()
@@ -198,7 +184,8 @@ function gf_category_megamenu_shortcode()
 /**
  * Prints out mega menu with categories
  */
-function printMegaMenu() {
+function printMegaMenu()
+{
     $gf_slider_id = '';
     if (get_term_by('slug', 'specijalne-promocije', 'product_cat')) {
         $gf_slider_id = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
@@ -209,13 +196,15 @@ function printMegaMenu() {
     }
     $product_cats = [];
     $number_of_categories = 24;
+    if (!empty(get_option('number_of_categories_in_sidebar'))) {
+        $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
+    }
     if (!empty(get_option('filter_fields_order'))) {
         $product_cats_array = get_option('filter_fields_order');
         foreach ($product_cats_array as $product_cat) {
-            $product_cats[] = get_term($product_cat['term_id']);
+            $product_cats[] = get_term($product_cat['term_id'], 'product_cat');
         }
-//        $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
-    } else{
+    } else {
         foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
             if ($cat->term_id === 3152) {
                 continue;
@@ -241,9 +230,9 @@ function printMegaMenu() {
             }
         }
     }
-    $i = 0;
-    $c = 0;
-    $pcc = 0;
+    $i = 0; //counter for number of ccategories
+    $c = 0; //counter for child cats children
+    $pcc = 0; //counter for parent cat children
     echo
     '<div id="gf-wrapper">
 	     <div class="gf-sidebar">
@@ -252,7 +241,7 @@ function printMegaMenu() {
     if ($i <= $number_of_categories) {
         foreach ($product_cats as $cat) {
             if ($cat->parent == 0) {
-                $parent_children_count = count(get_term_children($cat->term_id,'product_cat'));
+                $parent_children_count = count(get_term_children($cat->term_id, 'product_cat'));
                 $i++;
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/first-level.php'));
             }
@@ -274,12 +263,12 @@ function printMegaMenu() {
                     $c = 0;
                 }
             }
-            if ($pcc == $parent_children_count){
+            if ($pcc == $parent_children_count) {
                 echo '</div>
                     </div>
                 </li>
             </ul>';
-                $pcc=0;
+                $pcc = 0;
             }
         }
 
