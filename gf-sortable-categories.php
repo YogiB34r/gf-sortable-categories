@@ -52,6 +52,7 @@ function register_gf_sortable_categories_options()
 {
     register_setting('gf-sortable-categories-settings-group', 'filter_fields_order');
     register_setting('gf-sortable-categories-settings-group', 'number_of_categories_in_sidebar');
+    register_setting('gf-sortable-categories-settings-group', 'reset-categories');
 }
 
 function gf_clear_megamenu_cache()
@@ -67,11 +68,18 @@ function gf_reset_category_order()
     global $wpdb;
     $sql = "UPDATE wp_options SET option_value = ''  WHERE option_name = 'filter_fields_order'";
     $wpdb->query($sql);
-    $update = $this->db->query($sql);
 }
 
 function gf_sortable_categories_options_page()
 {
+    if (isset($_REQUEST['settings-updated'])) {
+        gf_clear_megamenu_cache();
+    }
+    if (isset($_REQUEST['reset-categories'])) {
+        gf_reset_category_order();
+        header("Location: http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]&message=success");
+        exit;
+    }
     $gf_slider_id = '';
     $sliderCat = get_term_by('slug', 'specijalne-promocije', 'product_cat');
     if ($sliderCat) {
@@ -120,9 +128,13 @@ function gf_sortable_categories_options_page()
     <div class="wrap">
         <h2><?= _e('Opcije sortiranja kategorija', 'gf-sortable-categories') ?></h2>
         <br/>
-
+        <?php if (isset($_GET['message'])){
+            echo '
+            <div class="notice notice-success is-dismissible">
+            <p>Uspešno ste resetovali redosled kategorija</p>
+        </div>';
+        }?>
         <?php settings_errors(); ?>
-
         <form method="post" action="options.php" id="theme-options-form">
             <?php settings_fields('gf-sortable-categories-settings-group'); ?>
             <?php do_settings_sections('gf-sortable-categories-settings-group'); ?>
@@ -142,21 +154,21 @@ function gf_sortable_categories_options_page()
                     //Delete categories that where deleted from admin menu
                     $diffA = array_diff(array_map('json_encode', $filter_fields_order), array_map('json_encode', $fields_order_default));
                     $diffA = array_map('json_decode', $diffA);
-                    foreach ($diffA as $key => $value){
+                    foreach ($diffA as $key => $value) {
                         unset($filter_fields_order[$key]);
                     }
 
                     //Checks if categories where added from admin menu and shows them in list
                     $diffB = array_diff(array_map('json_encode', $fields_order_default), array_map('json_encode', $filter_fields_order));
                     $diffB = array_map('json_decode', $diffB);
-                    foreach ($diffB as $value){
-                       if (gf_check_level_of_category($value->term_id) == 1){
-                           $filter_fields_order[] = get_term($value->term_id,'product_cat');
-                       }
-                       if (gf_check_level_of_category($value->term_id) == 2 || gf_check_level_of_category($value->term_id) == 3) {
-                           $index = array_search($value->parent,array_column($filter_fields_order,'term_id'))+1;
-                           $filter_fields_order = gf_insert_in_array_by_index($filter_fields_order,$index,$value);
-                       }
+                    foreach ($diffB as $value) {
+                        if (gf_check_level_of_category($value->term_id) == 1) {
+                            $filter_fields_order[] = get_term($value->term_id, 'product_cat');
+                        }
+                        if (gf_check_level_of_category($value->term_id) == 2 || gf_check_level_of_category($value->term_id) == 3) {
+                            $index = array_search($value->parent, array_column($filter_fields_order, 'term_id')) + 1;
+                            $filter_fields_order = gf_insert_in_array_by_index($filter_fields_order, $index, $value);
+                        }
                     }
                     foreach ($filter_fields_order as $value) {
                         $id = $value->term_id;
@@ -172,20 +184,21 @@ function gf_sortable_categories_options_page()
             <label for="number_of_categories"><?= __('Broj kategorija koje će biti prikazane na bočnom meniju') ?></label>
             <input type="number" name="number_of_categories_in_sidebar"
                    value="<?= $number_of_categories ?>"/>
-            <?php submit_button('', 'primary', 'gf-sortable-categories'); ?>
-            <button type="button" class="button button-primary" name="reset-categories">Resetujte redosled kategorija
-            </button>
+            <?php submit_button('Sačuvajte izmene', 'primary', 'gf-sortable-categories'); ?>
+        </form>
+        <form id="category-reset" method="post" action="">
+            <input class="button button-primary" type="submit" name="reset-categories"
+                   value="Resetujte redosled kategorija"/>
         </form>
     </div><!--WRAP-->
     <script type="text/javascript">
-        $('#theme-options-form').submit(function (e) {
-                e.preventDefault(); // don't submit multiple times
-                this.submit(); // use the native submit method of the form element
-                setTimeout(function () {
-                    <?php gf_clear_megamenu_cache() ?>
-                }, 100);
-            },
-        );
+        jQuery(document).ready(function () {
+            $('#category-reset').click(function (e) {
+                if (confirm("Da li ste sigurni da želite da resetujete redosled kategorija ?")) {
+                    $('#category-reset').submit();
+                }
+            });
+        });
     </script>
     <?php
 }
