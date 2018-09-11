@@ -77,6 +77,7 @@ function gf_sortable_categories_options_page()
     }
     if (isset($_REQUEST['reset-categories'])) {
         gf_reset_category_order();
+        gf_clear_megamenu_cache();
         header("Location: http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]&message=success");
         exit;
     }
