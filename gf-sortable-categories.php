@@ -27,13 +27,13 @@ function gf_sortable_categories_admin_scripts()
 {
     if (is_admin()) {
         wp_enqueue_style('jqueri-ui-css', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
-        wp_enqueue_style('gf-sortable-categories-admin-css', plugins_url() . '/gf-sortable-categories/css/gf-sortable-categories-admin.css');
-        wp_register_script('sortable-categories-admin-js', plugins_url() . '/gf-sortable-categories/js/sortable-categories-admin.js', array('jquery'), '', true);
+//        wp_enqueue_style('gf-sortable-categories-admin-css', plugins_url() . '/gf-sortable-categories/css/gf-sortable-categories-admin.css');
+//        wp_register_script('sortable-categories-admin-js', plugins_url() . '/gf-sortable-categories/js/sortable-categories-admin.js', array('jquery'), '', true);
         wp_enqueue_script('sortable-categories-admin-js');
         wp_enqueue_script('jquery-ui-widget');
         wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_script('jquery-ui-accordion');
-        wp_enqueue_style('gf-sortable-categories-admin-css', plugins_url() . '/gf-sortable-categories/css/gf-sortable-categories-admin.css');
+//        wp_enqueue_style('gf-sortable-categories-admin-css', plugins_url() . '/gf-sortable-categories/css/gf-sortable-categories-admin.css');
     }
 }
 
@@ -131,12 +131,12 @@ function gf_sortable_categories_options_page()
     <div class="wrap">
         <h2><?= _e('Opcije sortiranja kategorija', 'gf-sortable-categories') ?></h2>
         <br/>
-        <?php if (isset($_GET['message'])){
+        <?php if (isset($_GET['message'])) {
             echo '
             <div class="notice notice-success is-dismissible">
             <p>Uspešno ste resetovali redosled kategorija</p>
         </div>';
-        }?>
+        } ?>
         <?php settings_errors(); ?>
         <form method="post" action="options.php" id="theme-options-form">
             <?php settings_fields('gf-sortable-categories-settings-group'); ?>
@@ -319,4 +319,90 @@ function printMegaMenu()
     echo '</div>
 	</div>
 </div>';
+}
+
+add_shortcode('gf-category-mobile', 'gf_category_mobile_toggle_shortcode');
+function gf_category_mobile_toggle_shortcode()
+{
+    if (wp_is_mobile()) {
+        $gf_slider_id = '';
+        if (get_term_by('slug', 'specijalne-promocije', 'product_cat')) {
+            $gf_slider_id = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
+        }
+        $uncategorized_id = '';
+        if (get_term_by('slug', 'uncategorized', 'product_cat')) {
+            $uncategorized_id = get_term_by('slug', 'uncategorized', 'product_cat')->term_id;
+        }
+        $product_cats = [];
+        $number_of_categories = 24;
+        if (!empty(get_option('number_of_categories_in_sidebar'))) {
+            $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
+        }
+        if (!empty(get_option('filter_fields_order'))) {
+            $product_cats_array = get_option('filter_fields_order');
+            foreach ($product_cats_array as $product_cat) {
+                $product_cats[] = get_term($product_cat['term_id'], 'product_cat');
+            }
+        } else {
+            foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
+                if ($cat->term_id === 3152) {
+                    continue;
+                }
+                $catTermChildren = get_term_children($cat->term_id, 'product_cat');
+                if (empty($catTermChildren)) {
+                    $product_cats[] = $cat;
+                } else {
+                    $product_cats[] = $cat;
+                    foreach ($catTermChildren as $second_level_cat) {
+                        if (gf_check_level_of_category($second_level_cat) == 2) {
+                            $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
+                            if (empty($secondCatTermChildren)) {
+                                $product_cats[] = get_term($second_level_cat, 'product_cat');
+                            } else {
+                                $product_cats[] = get_term($second_level_cat, 'product_cat');
+                                foreach ($secondCatTermChildren as $third_level_cat) {
+                                    $product_cats[] = get_term($third_level_cat, 'product_cat');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $i = 0; //counter for number of ccategories
+        $c = 0; //counter for child cats children
+        $pcc = 0; //counter for parent cat children
+        echo '<div class="gf-category-mobile-toggle">Kategorije</div>';
+        echo '<div class="gf-category-accordion">';
+        if ($i <= $number_of_categories) {
+            foreach ($product_cats as $cat) {
+                if ($cat->parent == 0) {
+                    $parent_children_count = count(get_term_children($cat->term_id, 'product_cat'));
+                    $i++;
+                    require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/first-level.php'));
+                }
+                if (gf_check_level_of_category($cat->term_id) == 2) {
+                    $child_count = count(get_term_children($cat->term_id, 'product_cat'));
+                    require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/second-level.php'));
+                    $pcc++;
+                }
+                if (gf_check_level_of_category($cat->term_id) == 3) {
+                    require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/third-level.php'));
+                    $c++;
+                    $pcc++;
+                }
+                if (gf_check_level_of_category($cat->term_id) == 2 || gf_check_level_of_category($cat->term_id) == 3) {
+                    if ($c == $child_count) {
+                        echo '</div>';
+                        $c = 0;
+                    }
+                }
+                if ($pcc == $parent_children_count) {
+                    echo '</div>';
+                    $pcc = 0;
+                }
+            }
+        };
+        echo '</div>';
+    }
 }
