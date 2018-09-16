@@ -20,6 +20,8 @@
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
 
+require_once(plugin_dir_path(__FILE__) . '/../gf-widgets/includes/GF_Cache.php');
+
 load_plugin_textdomain('gf-sortable-categories', '', plugins_url() . '/gf-sortable-categories/languages');
 function gf_sortable_categories_admin_scripts()
 {
@@ -210,16 +212,14 @@ function gf_category_megamenu_shortcode()
 {
     $key = 'gf-megamenu';
 //    $group = 'gf-sidebar-static';
-    $redis = new Redis();
-    $redis->connect('127.0.0.1');
-//    $html = wp_cache_get($key, $group);
-    $html = $redis->get($key);
+    $cache = new GF_Cache();
+    $html = $cache->redis->get($key);
     if ($html === false) {
         ob_start();
         printMegaMenu();
         $html = ob_get_clean();
 //        wp_cache_set($key, $html, $group, 300);
-        $redis->set($key, $html, 60 * 60); // 1 hour
+        $cache->redis->set($key, $html, 60 * 60); // 1 hour
     }
     echo $html;
 }
