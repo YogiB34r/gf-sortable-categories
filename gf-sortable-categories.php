@@ -324,7 +324,7 @@ function printMegaMenu()
 add_shortcode('gf-category-mobile', 'gf_category_mobile_toggle_shortcode');
 function gf_category_mobile_toggle_shortcode()
 {
-    if (wp_is_mobile()) {
+//    if (wp_is_mobile()) {
         $gf_slider_id = '';
         if (get_term_by('slug', 'specijalne-promocije', 'product_cat')) {
             $gf_slider_id = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
@@ -404,5 +404,5 @@ function gf_category_mobile_toggle_shortcode()
             }
         };
         echo '</div>';
-    }
+//    }
 }
