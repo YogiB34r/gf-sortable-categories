@@ -372,7 +372,7 @@ function gf_category_mobile_toggle_shortcode()
         $i = 0; //counter for number of ccategories
         $c = 0; //counter for child cats children
         $pcc = 0; //counter for parent cat children
-        echo '<div class="gf-category-mobile-toggle">Kategorije</div>';
+        echo '<div class="gf-category-mobile-toggle"><i class="fas fa-bars"></i>Kategorije</div>';
         echo '<div class="gf-category-accordion">';
         if ($i <= $number_of_categories) {
             foreach ($product_cats as $cat) {
