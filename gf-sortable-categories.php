@@ -388,6 +388,7 @@ function printMobileMegaMenu() {
     $pcc = 0; //counter for parent cat children
     echo '<div class="gf-category-mobile-toggle"><i class="fas fa-bars" id="gf-bars-icon-toggle"></i></div>';
     echo '<div class="gf-category-accordion">';
+    echo '<div class="gf-category-accordion__item gf-category-accordion__item--main"><h5>Kategorije</h5></div>';
     if ($i <= $number_of_categories) {
         foreach ($product_cats as $cat) {
             if ($cat->parent == 0) {
