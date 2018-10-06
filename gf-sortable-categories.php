@@ -324,7 +324,7 @@ function printMegaMenu()
 add_shortcode('gf-category-mobile', 'gf_category_mobile_toggle_shortcode');
 function gf_category_mobile_toggle_shortcode()
 {
-    if (wp_is_mobile()) {
+//    if (wp_is_mobile()) {
         $key = 'gf-megamenu-mobile';
         $cache = new GF_Cache();
         $html = $cache->redis->get($key);
@@ -335,7 +335,7 @@ function gf_category_mobile_toggle_shortcode()
             $cache->redis->set($key, $html, 60 * 60); // 1 hour
         }
         echo $html;
-    }
+//    }
 }
 
 function printMobileMegaMenu() {
