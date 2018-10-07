@@ -19,9 +19,7 @@
  * License:     GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
-
 require_once(plugin_dir_path(__FILE__) . '/../gf-widgets/includes/GF_Cache.php');
-
 load_plugin_textdomain('gf-sortable-categories', '', plugins_url() . '/gf-sortable-categories/languages');
 function gf_sortable_categories_admin_scripts()
 {
@@ -36,27 +34,21 @@ function gf_sortable_categories_admin_scripts()
 //        wp_enqueue_style('gf-sortable-categories-admin-css', plugins_url() . '/gf-sortable-categories/css/gf-sortable-categories-admin.css');
     }
 }
-
 add_action('admin_enqueue_scripts', 'gf_sortable_categories_admin_scripts');
-
 add_action('admin_menu', 'gf_sortable_categories_options_create_menu');
-
 function gf_sortable_categories_options_create_menu()
 {
     //create new top-level menu
     add_menu_page('Sortable Categories', 'Opcije sortiranja kategorija', 'administrator', 'sortable_categories_options', 'gf_sortable_categories_options_page', null, 99);
-
     //call register settings function
     add_action('admin_init', 'register_gf_sortable_categories_options');
 }
-
 function register_gf_sortable_categories_options()
 {
     register_setting('gf-sortable-categories-settings-group', 'filter_fields_order');
     register_setting('gf-sortable-categories-settings-group', 'number_of_categories_in_sidebar');
     register_setting('gf-sortable-categories-settings-group', 'reset-categories');
 }
-
 function gf_clear_megamenu_cache()
 {
     $key = 'gf-megamenu';
@@ -64,14 +56,12 @@ function gf_clear_megamenu_cache()
     $redis->connect('127.0.0.1');
     $redis->del($key);
 }
-
 function gf_reset_category_order()
 {
     global $wpdb;
     $sql = "UPDATE wp_options SET option_value = ''  WHERE option_name = 'filter_fields_order'";
     $wpdb->query($sql);
 }
-
 function gf_sortable_categories_options_page()
 {
     if (isset($_REQUEST['settings-updated'])) {
@@ -119,12 +109,10 @@ function gf_sortable_categories_options_page()
     if (!empty(get_option('number_of_categories_in_sidebar'))) {
         $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     }
-
     $fields_order_default = [];
     $pc = 0;//counter for childs of parent category
     $c = 0;//counter for second level categories
     $cc = 0;//counter for childs of second level category
-
     foreach ($product_cats as $cat) {
         $fields_order_default[] = $cat;
     } ?>
@@ -160,7 +148,6 @@ function gf_sortable_categories_options_page()
                     foreach ($diffA as $key => $value) {
                         unset($filter_fields_order[$key]);
                     }
-
                     //Checks if categories where added from admin menu and shows them in list
                     $diffB = array_diff(array_map('json_encode', $fields_order_default), array_map('json_encode', $filter_fields_order));
                     $diffB = array_map('json_decode', $diffB);
@@ -205,7 +192,6 @@ function gf_sortable_categories_options_page()
     </script>
     <?php
 }
-
 // Category sidebar
 add_shortcode('gf-category-megamenu', 'gf_category_megamenu_shortcode');
 function gf_category_megamenu_shortcode()
@@ -223,7 +209,6 @@ function gf_category_megamenu_shortcode()
     }
     echo $html;
 }
-
 /**
  * Prints out mega menu with categories
  */
@@ -298,7 +283,6 @@ function printMegaMenu()
                 $c++;
                 $pcc++;
             }
-
             if (gf_check_level_of_category($cat->term_id) == 3 || gf_check_level_of_category($cat->term_id) == 2) {
                 if ($c == $child_count) {
                     echo '</ol>
@@ -314,95 +298,106 @@ function printMegaMenu()
                 $pcc = 0;
             }
         }
-
     }
     echo '</div>
 	</div>
 </div>';
 }
-
 add_shortcode('gf-category-mobile', 'gf_category_mobile_toggle_shortcode');
 function gf_category_mobile_toggle_shortcode()
 {
 //    if (wp_is_mobile()) {
-        $gf_slider_id = '';
-        if (get_term_by('slug', 'specijalne-promocije', 'product_cat')) {
-            $gf_slider_id = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
+    $key = 'gf-megamenu-mobile';
+    $cache = new GF_Cache();
+    $html = $cache->redis->get($key);
+    if ($html === false) {
+        ob_start();
+        printMobileMegaMenu();
+        $html = ob_get_clean();
+        $cache->redis->set($key, $html, 60 * 60); // 1 hour
+    }
+    echo $html;
+//    }
+}
+function printMobileMegaMenu() {
+    $gf_slider_id = '';
+    if (get_term_by('slug', 'specijalne-promocije', 'product_cat')) {
+        $gf_slider_id = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
+    }
+    $uncategorized_id = '';
+    if (get_term_by('slug', 'uncategorized', 'product_cat')) {
+        $uncategorized_id = get_term_by('slug', 'uncategorized', 'product_cat')->term_id;
+    }
+    $product_cats = [];
+    $number_of_categories = 24;
+    if (!empty(get_option('number_of_categories_in_sidebar'))) {
+        $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
+    }
+    if (!empty(get_option('filter_fields_order'))) {
+        $product_cats_array = get_option('filter_fields_order');
+        foreach ($product_cats_array as $product_cat) {
+            $product_cats[] = get_term($product_cat['term_id'], 'product_cat');
         }
-        $uncategorized_id = '';
-        if (get_term_by('slug', 'uncategorized', 'product_cat')) {
-            $uncategorized_id = get_term_by('slug', 'uncategorized', 'product_cat')->term_id;
-        }
-        $product_cats = [];
-        $number_of_categories = 24;
-        if (!empty(get_option('number_of_categories_in_sidebar'))) {
-            $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
-        }
-        if (!empty(get_option('filter_fields_order'))) {
-            $product_cats_array = get_option('filter_fields_order');
-            foreach ($product_cats_array as $product_cat) {
-                $product_cats[] = get_term($product_cat['term_id'], 'product_cat');
+    } else {
+        foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
+            if ($cat->term_id === 3152) {
+                continue;
             }
-        } else {
-            foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
-                if ($cat->term_id === 3152) {
-                    continue;
-                }
-                $catTermChildren = get_term_children($cat->term_id, 'product_cat');
-                if (empty($catTermChildren)) {
-                    $product_cats[] = $cat;
-                } else {
-                    $product_cats[] = $cat;
-                    foreach ($catTermChildren as $second_level_cat) {
-                        if (gf_check_level_of_category($second_level_cat) == 2) {
-                            $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
-                            if (empty($secondCatTermChildren)) {
-                                $product_cats[] = get_term($second_level_cat, 'product_cat');
-                            } else {
-                                $product_cats[] = get_term($second_level_cat, 'product_cat');
-                                foreach ($secondCatTermChildren as $third_level_cat) {
-                                    $product_cats[] = get_term($third_level_cat, 'product_cat');
-                                }
+            $catTermChildren = get_term_children($cat->term_id, 'product_cat');
+            if (empty($catTermChildren)) {
+                $product_cats[] = $cat;
+            } else {
+                $product_cats[] = $cat;
+                foreach ($catTermChildren as $second_level_cat) {
+                    if (gf_check_level_of_category($second_level_cat) == 2) {
+                        $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
+                        if (empty($secondCatTermChildren)) {
+                            $product_cats[] = get_term($second_level_cat, 'product_cat');
+                        } else {
+                            $product_cats[] = get_term($second_level_cat, 'product_cat');
+                            foreach ($secondCatTermChildren as $third_level_cat) {
+                                $product_cats[] = get_term($third_level_cat, 'product_cat');
                             }
                         }
                     }
                 }
             }
         }
-        $i = 0; //counter for number of ccategories
-        $c = 0; //counter for child cats children
-        $pcc = 0; //counter for parent cat children
-        echo '<div class="gf-category-mobile-toggle"><i class="fas fa-bars"></i>Kategorije</div>';
-        echo '<div class="gf-category-accordion">';
-        if ($i <= $number_of_categories) {
-            foreach ($product_cats as $cat) {
-                if ($cat->parent == 0) {
-                    $parent_children_count = count(get_term_children($cat->term_id, 'product_cat'));
-                    $i++;
-                    require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/first-level.php'));
-                }
-                if (gf_check_level_of_category($cat->term_id) == 2) {
-                    $child_count = count(get_term_children($cat->term_id, 'product_cat'));
-                    require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/second-level.php'));
-                    $pcc++;
-                }
-                if (gf_check_level_of_category($cat->term_id) == 3) {
-                    require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/third-level.php'));
-                    $c++;
-                    $pcc++;
-                }
-                if (gf_check_level_of_category($cat->term_id) == 2 || gf_check_level_of_category($cat->term_id) == 3) {
-                    if ($c == $child_count) {
-                        echo '</div>';
-                        $c = 0;
-                    }
-                }
-                if ($pcc == $parent_children_count) {
+    }
+    $i = 0; //counter for number of ccategories
+    $c = 0; //counter for child cats children
+    $pcc = 0; //counter for parent cat children
+    echo '<div class="gf-category-mobile-toggle"><i class="fas fa-bars" id="gf-bars-icon-toggle"></i></div>';
+    echo '<div class="gf-category-accordion">';
+    echo '<div class="gf-category-accordion__item gf-category-accordion__item--main"><h5>Kategorije</h5></div>';
+    if ($i <= $number_of_categories) {
+        foreach ($product_cats as $cat) {
+            if ($cat->parent == 0) {
+                $parent_children_count = count(get_term_children($cat->term_id, 'product_cat'));
+                $i++;
+                require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/first-level.php'));
+            }
+            if (gf_check_level_of_category($cat->term_id) == 2) {
+                $child_count = count(get_term_children($cat->term_id, 'product_cat'));
+                require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/second-level.php'));
+                $pcc++;
+            }
+            if (gf_check_level_of_category($cat->term_id) == 3) {
+                require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/third-level.php'));
+                $c++;
+                $pcc++;
+            }
+            if (gf_check_level_of_category($cat->term_id) == 2 || gf_check_level_of_category($cat->term_id) == 3) {
+                if ($c == $child_count) {
                     echo '</div>';
-                    $pcc = 0;
+                    $c = 0;
                 }
             }
-        };
-        echo '</div>';
-//    }
+            if ($pcc == $parent_children_count) {
+                echo '</div>';
+                $pcc = 0;
+            }
+        }
+    };
+    echo '</div>';
 }
