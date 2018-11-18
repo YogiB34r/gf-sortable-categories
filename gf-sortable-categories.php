@@ -197,9 +197,6 @@ function gf_sortable_categories_options_page()
 add_shortcode('gf-category-megamenu', 'gf_category_megamenu_shortcode');
 function gf_category_megamenu_shortcode()
 {
-//    echo megamenuCached();
-//    return;
-
     $key = 'gf-megamenu';
 //    $group = 'gf-sidebar-static';
     $cache = new GF_Cache();
@@ -404,12 +401,4 @@ function printMobileMegaMenu() {
         }
     };
     echo '</div>';
-}
-
-function mobileMegamenucached() {
-    return '';
-}
-
-function megamenuCached() {
-    return '';
 }
