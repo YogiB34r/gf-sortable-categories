@@ -51,10 +51,11 @@ function register_gf_sortable_categories_options()
 }
 function gf_clear_megamenu_cache()
 {
+    $cache = new GF_Cache();
     $key = 'gf-megamenu';
-    $redis = new Redis();
-    $redis->connect('127.0.0.1');
-    $redis->del($key);
+    $key1 = 'gf-megamenu-mobile';
+    $cache->redis->del($key);
+    $cache->redis->del($key1);
 }
 function gf_reset_category_order()
 {
@@ -196,6 +197,9 @@ function gf_sortable_categories_options_page()
 add_shortcode('gf-category-megamenu', 'gf_category_megamenu_shortcode');
 function gf_category_megamenu_shortcode()
 {
+//    echo megamenuCached();
+//    return;
+
     $key = 'gf-megamenu';
 //    $group = 'gf-sidebar-static';
     $cache = new GF_Cache();
@@ -400,4 +404,12 @@ function printMobileMegaMenu() {
         }
     };
     echo '</div>';
+}
+
+function mobileMegamenucached() {
+    return '';
+}
+
+function megamenuCached() {
+    return '';
 }
