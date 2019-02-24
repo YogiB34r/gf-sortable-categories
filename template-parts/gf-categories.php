@@ -2,30 +2,29 @@
     $parent_children_count = count(get_term_children($id, 'product_cat'));
     ?>
     <li class="parent-cat accordion-first-level">
-    <input type="hidden" name="filter_fields_order[<?= $id ?>][term_id]"
-           value="<?= $id ?>"/>
+    <input type="hidden" name="filter_fields_order[<?= $id ?>][term_id]" value="<?= $id ?>"/>
     <h2 class="parent-header first-level-cat"><?= $name ?></h2>
     <?php if ($parent_children_count != 0) {
-    echo '<ul class="parent-cat-children">';
-}
-    ?>
-
+    echo '<ul class="parent-cat-children"><!-- open second level ul -->';
+    } ?>
 <?php endif;
-if (gf_check_level_of_category($id) == 2):
-    $c++;
+
+$currentCatLevel = gf_check_level_of_category($id);
+
+if ($currentCatLevel == 2):
+//    $c++;
     $pc++;
     $children_count = count(get_term_children($id, 'product_cat'));
     ?>
-    <li class="child-cat accordion-second-level">
-    <input type="hidden" name="filter_fields_order[<?= $id ?>][term_id]"
-           value="<?= $id ?>"/>
+    <li class="child-cat accordion-second-level"> <!-- open second level li -->
+    <input type="hidden" name="filter_fields_order[<?= $id ?>][term_id]" value="<?= $id ?>"/>
     <h4 class="child-header second-level-cat"><?= $name ?></h4>
     <?php if ($children_count != 0) {
-    echo '<ul class="child-cat-children">';
-}
-    ?>
+    echo '<ul class="child-cat-children"><!-- open third level ul -->';
+    } ?>
 <?php endif;
-if (gf_check_level_of_category($id) == 3):
+
+if ($currentCatLevel == 3):
     $cc++;
     $pc++;
     ?>
@@ -36,18 +35,31 @@ if (gf_check_level_of_category($id) == 3):
     </li>
 <?php endif;
 if ($pc == $parent_children_count) {
+    die();
     if ($parent_children_count != 0) {
-        echo '</ul>';
+        echo '</ul> <!-- close second level ul -->';
     }
-    echo '</li>';
+    echo '</li> <!-- close second level li -->';
     $pc = 0;
 }
-if (gf_check_level_of_category($id) == 3 || gf_check_level_of_category($id) == 2) {
+
+if ($currentCatLevel == 3) {
     if ($cc == $children_count) {
         if ($children_count != 0) {
-            echo '</ul>';
+            echo '</ul> <!-- close third level ul -->';
         }
-        echo '</li>';
+//        echo '</li> <!-- close third level li -->';
+
+        $cc = 0;
+    }
+}
+
+if ($currentCatLevel == 2) {
+    if ($cc == $children_count) {
+        if ($children_count != 0) {
+            echo '</ul> <!-- close second level ul -->';
+        }
+        echo '</li> <!-- close second level li -->';
 
         $cc = 0;
     }

@@ -84,48 +84,93 @@ function gf_sortable_categories_options_page()
     if ($uncategorizedCat) {
         $uncategorized_id = $uncategorizedCat->term_id;
     }
-    foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
+    $topLevelCats = gf_get_top_level_categories($gf_slider_id, $uncategorized_id);
+    foreach ($topLevelCats as $cat) {
         if ($cat->term_id === 3152) {
             continue;
         }
         $catTermChildren = get_term_children($cat->term_id, 'product_cat');
         if (empty($catTermChildren)) {
-            $product_cats[] = $cat;
+            $product_cats[$cat->term_id]['cat'] = [
+                'cat_id' => $cat->term_id,
+                'name' => $cat->name,
+                'parent' => $cat->parent,
+            ];
         } else {
-            $product_cats[] = $cat;
-            foreach ($catTermChildren as $second_level_cat) {
-                if (gf_check_level_of_category($second_level_cat) == 2) {
-                    $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
-                    $product_cats[] = get_term($second_level_cat, 'product_cat');
+            $product_cats[$cat->term_id]['cat'] = [
+                'cat_id' => $cat->term_id,
+                'name' => $cat->name,
+                'parent' => $cat->parent,
+            ];
+
+            foreach ($catTermChildren as $second_level_cat_id) {
+                if (gf_check_level_of_category($second_level_cat_id) == 2) {
+                    $secondCatTermChildren = get_term_children($second_level_cat_id, 'product_cat');
+                    $second_level_cat = get_term($second_level_cat_id, 'product_cat');
+                    $product_cats[$cat->term_id]['children'][$second_level_cat_id]['cat'] = [
+                        'cat_id' => $second_level_cat->term_id,
+                        'name' => $second_level_cat->name,
+                        'parent' => $second_level_cat->parent,
+                    ];
+
                     if (!empty($secondCatTermChildren)) {
-                        foreach ($secondCatTermChildren as $third_level_cat) {
-                            $product_cats[] = get_term($third_level_cat, 'product_cat');
+                        foreach ($secondCatTermChildren as $third_level_cat_id) {
+                            $third_level_cat = get_term($third_level_cat_id, 'product_cat');
+                            $product_cats[$cat->term_id]['children'][$second_level_cat_id]['children'][$third_level_cat_id]['cat'] = [
+                                'cat_id' => $third_level_cat->term_id,
+                                'name' => $third_level_cat->name,
+                                'parent' => $third_level_cat->parent,
+                            ];
                         }
                     }
                 }
             }
         }
     }
-    $number_of_categories = 24;
+    $number_of_categories = count($topLevelCats);
     if (!empty(get_option('number_of_categories_in_sidebar'))) {
         $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     }
-    $fields_order_default = [];
-    $pc = 0;//counter for childs of parent category
-    $c = 0;//counter for second level categories
-    $cc = 0;//counter for childs of second level category
-    foreach ($product_cats as $cat) {
-        $fields_order_default[] = $cat;
-    } ?>
+    $fields_order_default = $product_cats;
+
+    global $wpdb;
+
+    $data = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", 'filter_fields_order'));
+
+//                if (empty(get_option('filter_fields_order'))) {
+    if (!$data) {
+        $filter_fields_order = $fields_order_default;
+    } else {
+        $filter_fields_order = [];
+        foreach (unserialize($data) as $termId => $data) {
+            $termData = unserialize(array_keys($data)[0]);
+            if ($termData['cat']['parent']) {
+                $myParent = get_term($termData['cat']['parent'], 'product_cat');
+                if (is_object($myParent)) {
+                    if ($myParent->parent) { //3rd level
+                        $myParentsParent = get_term($myParent->parent, 'product_cat');
+                        if (is_object($myParentsParent)) {
+                            $filter_fields_order[$myParentsParent->term_id]['children'][$myParent->term_id]['children'][$termId]['cat'] = $termData['cat'];
+                        }
+                    } else { //2nd level
+                        $filter_fields_order[$myParent->term_id]['children'][$termId]['cat'] = $termData['cat'];
+                    }
+                }
+            } else {
+                $filter_fields_order[$termId]['cat'] = $termData['cat'];
+            }
+        }
+    }
+    ?>
     <div class="wrap">
         <h2><?= _e('Opcije sortiranja kategorija', 'gf-sortable-categories') ?></h2>
         <br/>
-        <?php if (isset($_GET['message'])) {
-            echo '
-            <div class="notice notice-success is-dismissible">
+        <?php if (isset($_GET['message'])): ?>
+        <div class="notice notice-success is-dismissible">
             <p>Uspešno ste resetovali redosled kategorija</p>
-        </div>';
-        } ?>
+        </div>
+        <?php endif; ?>
+
         <?php settings_errors(); ?>
         <form method="post" action="options.php" id="theme-options-form">
             <?php settings_fields('gf-sortable-categories-settings-group'); ?>
@@ -134,42 +179,106 @@ function gf_sortable_categories_options_page()
                 <label><b><?= __('Sortirajuća lista') ?> </b>
                     <em><?= __('(Postavite redosled kategorija prevlačenjem)') ?></em></label>
                 <ul class="filter-fields-list">
-                    <?php
-                    if (empty(get_option('filter_fields_order'))) {
-                        $filter_fields_order = $fields_order_default;
-                    } else {
-                        $filter_fields_order_db = get_option('filter_fields_order');
-                        foreach ($filter_fields_order_db as $term) {
-                            $filter_fields_order[] = get_term($term['term_id'], 'product_cat');
+                <?php
+                //Check for diff in saved and original categories for added/removed ones
+                if (md5(serialize($fields_order_default)) !== md5(serialize($filter_fields_order))) {
+                    /**
+                     * when relations are changed, that means one item is removed from displayed, and added to original,
+                     * so both actions will be performed.
+                     */
+                    $added = arrayRecursiveDiff($fields_order_default, $filter_fields_order);
+                    $removed = arrayRecursiveDiff($filter_fields_order, $fields_order_default);
+
+//                    if (!empty($removed) && empty($added)) {
+                    /**
+                     * will remove elements from displayed array that are not found in the original one.
+                     */
+                    if (!empty($removed)) {
+                        var_dump('removing...');
+                        foreach ($removed as $mainCatID => $mainCatData) {
+                            if (!is_array($mainCatData['children'])) { //remove first level cat
+                                unset($filter_fields_order[$mainCatID]);
+                            } else {
+                                foreach ($mainCatData['children'] as $subCatId => $subCatData) {
+                                    if (!isset($subCatData['children']) || !is_array($subCatData['children'])) { //remove second level cat
+                                        unset($filter_fields_order[$mainCatID]['children'][$subCatId]);
+                                    } else { //remove third level cat
+                                        foreach ($subCatData['children'] as $subCatChildId => $subCatChildData) {
+                                            unset($filter_fields_order[$mainCatID]['children'][$subCatId]['children'][$subCatChildId]);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                    //Delete categories that where deleted from admin menu
-                    $diffA = array_diff(array_map('json_encode', $filter_fields_order), array_map('json_encode', $fields_order_default));
-                    $diffA = array_map('json_decode', $diffA);
-                    foreach ($diffA as $key => $value) {
-                        unset($filter_fields_order[$key]);
-                    }
-                    //Checks if categories where added from admin menu and shows them in list
-                    $diffB = array_diff(array_map('json_encode', $fields_order_default), array_map('json_encode', $filter_fields_order));
-                    $diffB = array_map('json_decode', $diffB);
-                    foreach ($diffB as $value) {
-                        if (gf_check_level_of_category($value->term_id) == 1) {
-                            $filter_fields_order[] = get_term($value->term_id, 'product_cat');
+
+//                    if (!empty($added) && empty($removed)) {
+                    /**
+                     * will add elements into displayed array, that are added to original one
+                     */
+                    if (!empty($added)) {
+                        var_dump('adding...');
+                        foreach ($added as $mainCatID => $mainCatData) {
+                            if (!is_array($mainCatData['children'])) { // add first level cat only
+                                $filter_fields_order[$mainCatID] = $mainCatData;
+                            } else {
+                                foreach ($mainCatData['children'] as $subCatId => $subCatData) {
+                                    if (!isset($subCatData['children']) || !is_array($subCatData['children'])) {
+                                        if (!isset($filter_fields_order[$mainCatID])) {
+                                            //add first if not there
+                                            $filter_fields_order[$mainCatID] = $mainCatData;
+                                        }
+                                        //add second level cat
+                                        $filter_fields_order[$mainCatID]['children'][$subCatId] = $subCatData;
+                                    } else { //add second level if not there
+                                        if (!isset($filter_fields_order[$mainCatID]['children'][$subCatId])) {
+                                            $filter_fields_order[$mainCatID]['children'][$subCatId] = $subCatData;
+                                        }
+                                        //add third level cat
+                                        foreach ($subCatData['children'] as $subCatChildId => $subCatChildData) {
+                                            $filter_fields_order[$mainCatID]['children'][$subCatId]['children'][$subCatChildId] = $subCatChildData;
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        if (gf_check_level_of_category($value->term_id) == 2 || gf_check_level_of_category($value->term_id) == 3) {
-                            $index = array_search($value->parent, array_column($filter_fields_order, 'term_id')) + 1;
-                            $filter_fields_order = gf_insert_in_array_by_index($filter_fields_order, $index, $value);
-                        }
                     }
-                    foreach ($filter_fields_order as $value) {
-                        $id = $value->term_id;
-                        $parent = $value->parent;
-                        $name = $value->name;
-                        if (isset($id)): ?>
-                            <?php require(realpath(__DIR__ . '/template-parts/gf-categories.php')) ?>
-                        <?php endif; ?>
-                    <?php }//foreach
-                    ?>
+                }
+
+                //require(realpath(__DIR__ . '/template-parts/gf-categories.php'))
+
+                foreach ($filter_fields_order as $catId => $catData) : ?>
+                <li class="parent-cat accordion-first-level">
+                <input type="hidden" name="filter_fields_order[<?=$catId?>][<?=htmlspecialchars(serialize($catData))?>]" value="<?=$catId?>"/>
+                <h2 class="parent-header first-level-cat"><?=$catData['cat']['name']?></h2>
+
+                <?php if (isset($catData['children']) && count($catData['children']) > 0): ?>
+                <div>
+                    <ul class="parent-cat-children"><!-- open second level ul -->
+                    <?php foreach ($catData['children'] as $secondLvlCatId => $secondLevelCatData): ?>
+                        <li class="child-cat accordion-second-level"> <!-- open second level li -->
+                            <input type="hidden" name="filter_fields_order[<?=$secondLvlCatId?>][<?=htmlspecialchars(serialize($secondLevelCatData))?>]" value="<?=$secondLvlCatId?>"/>
+                            <h4 class="child-header second-level-cat"><?=$secondLevelCatData['cat']['name']?></h4>
+
+                            <?php if (isset($secondLevelCatData['children']) && count($secondLevelCatData['children']) > 0): ?>
+                            <div>
+                            <ul class="child-cat-children"><!-- open third level ul -->
+                            <?php foreach ($secondLevelCatData['children'] as $thirdLvlCatId => $thirdLevelCatData): ?>
+                                <li class="child-child-cat accordion-second-level">
+                                    <input type="hidden" name="filter_fields_order[<?=$thirdLvlCatId?>][<?=htmlspecialchars(serialize($thirdLevelCatData))?>]" value="<?=$secondLvlCatId?>"/>
+                                    <h4 class="child-header second-level-cat"><?=$thirdLevelCatData['cat']['name']?></h4>
+                                </li>
+                            <?php endforeach; ?>
+                            </ul><!-- close third level ul -->
+                            </div>
+                            <?php endif; ?>
+                        </li><!-- close second level li -->
+                    <?php endforeach; ?>
+                    </ul><!-- close second level ul -->
+                </div>
+                <?php endif; ?>
+
+                <?php endforeach; ?>
                 </ul><!--filter_fields_list-->
             </div><!--gf-sortable-categories-wrapper-->
             <label for="number_of_categories"><?= __('Broj kategorija koje će biti prikazane na bočnom meniju') ?></label>
@@ -193,21 +302,42 @@ function gf_sortable_categories_options_page()
     </script>
     <?php
 }
+
+function arrayRecursiveDiff($aArray1, $aArray2) {
+    $aReturn = array();
+
+    foreach ($aArray1 as $mKey => $mValue) {
+        if (array_key_exists($mKey, $aArray2)) {
+            if (is_array($mValue)) {
+                $aRecursiveDiff = arrayRecursiveDiff($mValue, $aArray2[$mKey]);
+                if (count($aRecursiveDiff)) { $aReturn[$mKey] = $aRecursiveDiff; }
+            } else {
+                if ($mValue != $aArray2[$mKey]) {
+                    $aReturn[$mKey] = $mValue;
+                }
+            }
+        } else {
+            $aReturn[$mKey] = $mValue;
+        }
+    }
+    return $aReturn;
+}
+
+
 // Category sidebar
 add_shortcode('gf-category-megamenu', 'gf_category_megamenu_shortcode');
 function gf_category_megamenu_shortcode()
 {
     $key = 'gf-megamenu';
-//    $group = 'gf-sidebar-static';
     $cache = new GF_Cache();
     $html = $cache->redis->get($key);
     if ($html === false) {
         ob_start();
         printMegaMenu();
         $html = ob_get_clean();
-//        wp_cache_set($key, $html, $group, 300);
         $cache->redis->set($key, $html, 60 * 60); // 1 hour
     }
+
     echo $html;
 }
 /**
@@ -228,10 +358,11 @@ function printMegaMenu()
     if (!empty(get_option('number_of_categories_in_sidebar'))) {
         $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     }
-    if (!empty(get_option('filter_fields_order'))) {
-        $product_cats_array = get_option('filter_fields_order');
-        foreach ($product_cats_array as $product_cat) {
-            $product_cats[] = get_term($product_cat['term_id'], 'product_cat');
+
+    $product_cats_array = get_option('filter_fields_order');
+    if (!empty($product_cats_array)) {
+        foreach ($product_cats_array as $termId => $data) {
+            $product_cats[] = get_term($termId, 'product_cat');
         }
     } else {
         foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
@@ -334,11 +465,15 @@ function printMobileMegaMenu() {
     if (!empty(get_option('number_of_categories_in_sidebar'))) {
         $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
     }
-    if (!empty(get_option('filter_fields_order'))) {
-        $product_cats_array = get_option('filter_fields_order');
-        foreach ($product_cats_array as $product_cat) {
-            $product_cats[] = get_term($product_cat['term_id'], 'product_cat');
+    $product_cats_array = get_option('filter_fields_order');
+    if (!empty($product_cats_array)) {
+        foreach ($product_cats_array as $termId => $data) {
+            $product_cats[] = get_term($termId, 'product_cat');
         }
+//        $product_cats_array = get_option('filter_fields_order');
+//        foreach ($product_cats_array as $product_cat) {
+//            $product_cats[] = get_term($product_cat['term_id'], 'product_cat');
+//        }
     } else {
         foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
             if ($cat->term_id === 3152) {
