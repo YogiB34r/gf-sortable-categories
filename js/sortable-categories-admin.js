@@ -46,14 +46,12 @@ jQuery(document).ready(function ($) {
         handle: "h4",
         axis: 'y',
         cursor: 'move',
-        connectWith: '.parent-cat-children',
         items: 'li',
     });
     $('.child-cat-children').sortable({
         handle: "h5",
         axis: 'y',
         cursor: 'move',
-        connectWith: '.child-cat-children',
         items: 'li',
     });
 });
