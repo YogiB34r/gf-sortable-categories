@@ -39,7 +39,7 @@ add_action('admin_menu', 'gf_sortable_categories_options_create_menu');
 function gf_sortable_categories_options_create_menu()
 {
     //create new top-level menu
-    add_menu_page('Sortable Categories', 'Opcije sortiranja kategorija', 'administrator', 'sortable_categories_options', 'gf_sortable_categories_options_page', null, 99);
+    add_submenu_page('nss-panel','Sortable Categories', 'Sortiranje kategorija', 'administrator', 'sortable_categories_options', 'gf_sortable_categories_options_page', 10);
     //call register settings function
     add_action('admin_init', 'register_gf_sortable_categories_options');
 }
@@ -84,7 +84,7 @@ function gf_sortable_categories_options_page()
     if ($uncategorizedCat) {
         $uncategorized_id = $uncategorizedCat->term_id;
     }
-    $topLevelCats = gf_get_top_level_categories($gf_slider_id, $uncategorized_id);
+    $topLevelCats = \Gf\Util\CategoryFunctions::gf_get_top_level_categories($gf_slider_id);
     foreach ($topLevelCats as $cat) {
         if ($cat->term_id === 3152) {
             continue;
@@ -104,7 +104,7 @@ function gf_sortable_categories_options_page()
             ];
 
             foreach ($catTermChildren as $second_level_cat_id) {
-                if (gf_check_level_of_category($second_level_cat_id) == 2) {
+                if (\Gf\Util\CategoryFunctions::gf_check_level_of_category($second_level_cat_id) == 2) {
                     $secondCatTermChildren = get_term_children($second_level_cat_id, 'product_cat');
                     $second_level_cat = get_term($second_level_cat_id, 'product_cat');
                     $product_cats[$cat->term_id]['children'][$second_level_cat_id]['cat'] = [
@@ -365,7 +365,7 @@ function printMegaMenu()
             $product_cats[] = get_term($termId, 'product_cat');
         }
     } else {
-        foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
+        foreach (\Gf\Util\CategoryFunctions::gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
             if ($cat->term_id === 3152) {
                 continue;
             }
@@ -375,7 +375,7 @@ function printMegaMenu()
             } else {
                 $product_cats[] = $cat;
                 foreach ($catTermChildren as $second_level_cat) {
-                    if (gf_check_level_of_category($second_level_cat) == 2) {
+                    if (\Gf\Util\CategoryFunctions::gf_check_level_of_category($second_level_cat) == 2) {
                         $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
                         if (empty($secondCatTermChildren)) {
                             $product_cats[] = get_term($second_level_cat, 'product_cat');
@@ -405,17 +405,18 @@ function printMegaMenu()
                 $i++;
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/first-level.php'));
             }
-            if (gf_check_level_of_category($cat->term_id) == 2) {
+            $catLevel = \Gf\Util\CategoryFunctions::gf_check_level_of_category($cat->term_id);
+            if ($catLevel == 2) {
                 $child_count = count(get_term_children($cat->term_id, 'product_cat'));
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/second-level.php'));
                 $pcc++;
             }
-            if (gf_check_level_of_category($cat->term_id) == 3) {
+            if ($catLevel == 3) {
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/third-level.php'));
                 $c++;
                 $pcc++;
             }
-            if (gf_check_level_of_category($cat->term_id) == 3 || gf_check_level_of_category($cat->term_id) == 2) {
+            if ($catLevel == 3 || $catLevel == 2) {
                 if ($c == $child_count) {
                     echo '</ol>
                                     </div>';
@@ -475,7 +476,7 @@ function printMobileMegaMenu() {
 //            $product_cats[] = get_term($product_cat['term_id'], 'product_cat');
 //        }
     } else {
-        foreach (gf_get_top_level_categories($gf_slider_id, $uncategorized_id) as $cat) {
+        foreach (\Gf\Util\CategoryFunctions::gf_get_top_level_categories($gf_slider_id) as $cat) {
             if ($cat->term_id === 3152) {
                 continue;
             }
@@ -485,7 +486,7 @@ function printMobileMegaMenu() {
             } else {
                 $product_cats[] = $cat;
                 foreach ($catTermChildren as $second_level_cat) {
-                    if (gf_check_level_of_category($second_level_cat) == 2) {
+                    if (\Gf\Util\CategoryFunctions::gf_check_level_of_category($second_level_cat) == 2) {
                         $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
                         if (empty($secondCatTermChildren)) {
                             $product_cats[] = get_term($second_level_cat, 'product_cat');
@@ -513,17 +514,18 @@ function printMobileMegaMenu() {
                 $i++;
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/first-level.php'));
             }
-            if (gf_check_level_of_category($cat->term_id) == 2) {
+            $catLevel = \Gf\Util\CategoryFunctions::gf_check_level_of_category($cat->term_id);
+            if ($catLevel == 2) {
                 $child_count = count(get_term_children($cat->term_id, 'product_cat'));
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/second-level.php'));
                 $pcc++;
             }
-            if (gf_check_level_of_category($cat->term_id) == 3) {
+            if ($catLevel == 3) {
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/third-level.php'));
                 $c++;
                 $pcc++;
             }
-            if (gf_check_level_of_category($cat->term_id) == 2 || gf_check_level_of_category($cat->term_id) == 3) {
+            if ($catLevel == 2 || $catLevel == 3) {
                 if ($c == $child_count) {
                     echo '</div>';
                     $c = 0;
