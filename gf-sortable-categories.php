@@ -390,6 +390,9 @@ function printMegaMenu() {
 		       <div class="gf-navblock">';
     if ($i <= $number_of_categories) {
         foreach ($product_cats as $cat) {
+            if (!$cat) {
+                continue;
+            }
             if ($cat->parent == 0) {
                 $parent_children_count = count(get_term_children($cat->term_id, 'product_cat'));
                 $i++;
@@ -492,6 +495,9 @@ function printMobileMegaMenu() {
     echo '<div class="gf-category-accordion__item gf-category-accordion__item--main"><h5>Kategorije</h5></div>';
     if ($i <= $number_of_categories) {
         foreach ($product_cats as $cat) {
+            if (!$cat) {
+                continue;
+            }
             if ($cat->parent == 0) {
                 $parent_children_count = count(get_term_children($cat->term_id, 'product_cat'));
                 $i++;
