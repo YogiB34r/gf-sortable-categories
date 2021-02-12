@@ -315,7 +315,6 @@ function arrayRecursiveDiff($aArray1, $aArray2) {
     return $aReturn;
 }
 
-
 // Category sidebar
 add_shortcode('gf-category-megamenu', 'gf_category_megamenu_shortcode');
 function gf_category_megamenu_shortcode() {
@@ -331,6 +330,7 @@ function gf_category_megamenu_shortcode() {
 
     echo $html;
 }
+
 /**
  * Prints out mega menu with categories
  */
@@ -383,11 +383,10 @@ function printMegaMenu() {
     $i = 0; //counter for number of categories
     $c = 0; //counter for child cats children
     $pcc = 0; //counter for parent cat children
-    echo
-    '<div id="gf-wrapper">
-	     <div class="gf-sidebar">
-		     <div class="gf-toggle"><i class="fa fa-bars"></i></div>
-		       <div class="gf-navblock">';
+    ?>
+    <div id="gf-wrapper" class="gf-sidebar">
+		       <div id="nssMegaNav" class="gf-navblock">
+    <?php
     if ($i <= $number_of_categories) {
         foreach ($product_cats as $cat) {
             if (!$cat) {
@@ -409,26 +408,26 @@ function printMegaMenu() {
                 $c++;
                 $pcc++;
             }
-            if ($catLevel == 3 || $catLevel == 2) {
-                if ($c == $child_count) {
-                    echo '</ol>
-                                    </div>';
-                    $c = 0;
-                }
-            }
-            if ($pcc == $parent_children_count) {
-                echo '</div>
+            if ($catLevel == 3 || $catLevel == 2):
+                if ($c == $child_count):?>
                     </div>
-                </li>
-            </ul>';
+                    <?php
+                    $c = 0;
+                endif;
+            endif;
+            if ($pcc == $parent_children_count):
+                ?></div>
+                    </div>
+                </div><?php
                 $pcc = 0;
-            }
+            endif;
         }
     }
-    echo '</div>
-	</div>
-</div>';
+    ?></div>
+    </div>
+<?php
 }
+
 add_shortcode('gf-category-mobile', 'gf_category_mobile_toggle_shortcode');
 function gf_category_mobile_toggle_shortcode() {
     $key = 'gf-megamenu-mobile';
@@ -440,46 +439,45 @@ function gf_category_mobile_toggle_shortcode() {
         $html = ob_get_clean();
         $cache->redis->set($key, $html, 60 * 60); // 1 hour
     }
-    echo $html;
+    return $html;
+//    echo $html;
 }
+
 function printMobileMegaMenu() {
-    $gf_slider_id = '';
+    $gfSliderId = '';
     if (get_term_by('slug', 'specijalne-promocije', 'product_cat')) {
-        $gf_slider_id = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
+        $gfSliderId = get_term_by('slug', 'specijalne-promocije', 'product_cat')->term_id;
     }
-//    $uncategorized_id = '';
-//    if (get_term_by('slug', 'uncategorized', 'product_cat')) {
-//        $uncategorized_id = get_term_by('slug', 'uncategorized', 'product_cat')->term_id;
-//    }
-    $product_cats = [];
-    $number_of_categories = 24;
+
+    $productCats = [];
+    $numOfCats = 24;
     if (!empty(get_option('number_of_categories_in_sidebar'))) {
-        $number_of_categories = esc_attr(get_option('number_of_categories_in_sidebar'));
+        $numOfCats = esc_attr(get_option('number_of_categories_in_sidebar'));
     }
-    $product_cats_array = get_option('filter_fields_order');
-    if (!empty($product_cats_array)) {
-        foreach ($product_cats_array as $termId => $data) {
-            $product_cats[] = get_term($termId, 'product_cat');
+    $productCatsArray = get_option('filter_fields_order');
+    if (!empty($productCatsArray)) {
+        foreach ($productCatsArray as $termId => $data) {
+            $productCats[] = get_term($termId, 'product_cat');
         }
     } else {
-        foreach (\Gf\Util\CategoryFunctions::gf_get_top_level_categories($gf_slider_id) as $cat) {
+        foreach (\Gf\Util\CategoryFunctions::gf_get_top_level_categories($gfSliderId) as $cat) {
             if ($cat->term_id === 3152) {
                 continue;
             }
             $catTermChildren = get_term_children($cat->term_id, 'product_cat');
             if (empty($catTermChildren)) {
-                $product_cats[] = $cat;
+                $productCats[] = $cat;
             } else {
-                $product_cats[] = $cat;
-                foreach ($catTermChildren as $second_level_cat) {
-                    if (\Gf\Util\CategoryFunctions::gf_check_level_of_category($second_level_cat) == 2) {
-                        $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
+                $productCats[] = $cat;
+                foreach ($catTermChildren as $secondLevelCat) {
+                    if (\Gf\Util\CategoryFunctions::gf_check_level_of_category($secondLevelCat) == 2) {
+                        $secondCatTermChildren = get_term_children($secondLevelCat, 'product_cat');
                         if (empty($secondCatTermChildren)) {
-                            $product_cats[] = get_term($second_level_cat, 'product_cat');
+                            $productCats[] = get_term($secondLevelCat, 'product_cat');
                         } else {
-                            $product_cats[] = get_term($second_level_cat, 'product_cat');
-                            foreach ($secondCatTermChildren as $third_level_cat) {
-                                $product_cats[] = get_term($third_level_cat, 'product_cat');
+                            $productCats[] = get_term($secondLevelCat, 'product_cat');
+                            foreach ($secondCatTermChildren as $thirdLevelCat) {
+                                $productCats[] = get_term($thirdLevelCat, 'product_cat');
                             }
                         }
                     }
@@ -487,44 +485,44 @@ function printMobileMegaMenu() {
             }
         }
     }
-    $i = 0; //counter for number of ccategories
-    $c = 0; //counter for child cats children
-    $pcc = 0; //counter for parent cat children
-    echo '<div class="gf-category-mobile-toggle"><i class="fas fa-bars" id="gf-bars-icon-toggle"></i></div>';
-    echo '<div class="gf-category-accordion">';
+    $catCounter = 0; //counter for number of ccategories
+    $childrenCatCounter = 0; //counter for child cats children
+    $parentCatsCounter = 0; //counter for parent cat children
+//    echo '<div class="gf-category-mobile-toggle"><i class="fas fa-bars" id="gf-bars-icon-toggle"></i></div>';
+//    echo '<div id="mobileMegaMenu" class="gf-category-accordion">';
     echo '<div class="gf-category-accordion__item gf-category-accordion__item--main"><h5>Kategorije</h5></div>';
-    if ($i <= $number_of_categories) {
-        foreach ($product_cats as $cat) {
+    if ($catCounter <= $numOfCats) {
+        foreach ($productCats as $cat) {
             if (!$cat) {
                 continue;
             }
             if ($cat->parent == 0) {
-                $parent_children_count = count(get_term_children($cat->term_id, 'product_cat'));
-                $i++;
+                $parentChildrenCount = count(get_term_children($cat->term_id, 'product_cat'));
+                $catCounter++;
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/first-level.php'));
             }
             $catLevel = \Gf\Util\CategoryFunctions::gf_check_level_of_category($cat->term_id);
             if ($catLevel == 2) {
-                $child_count = count(get_term_children($cat->term_id, 'product_cat'));
+                $childrenCount = count(get_term_children($cat->term_id, 'product_cat'));
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/second-level.php'));
-                $pcc++;
+                $parentCatsCounter++;
             }
             if ($catLevel == 3) {
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/third-level.php'));
-                $c++;
-                $pcc++;
+                $childrenCatCounter++;
+                $parentCatsCounter++;
             }
             if ($catLevel == 2 || $catLevel == 3) {
-                if ($c == $child_count) {
+                if ($childrenCatCounter == $childrenCount) {
                     echo '</div>';
-                    $c = 0;
+                    $childrenCatCounter = 0;
                 }
             }
-            if ($pcc == $parent_children_count) {
+            if ($parentCatsCounter == $parentChildrenCount) {
                 echo '</div>';
-                $pcc = 0;
+                $parentCatsCounter = 0;
             }
         }
     };
-    echo '</div>';
+//    echo '</div>';
 }

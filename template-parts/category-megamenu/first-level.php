@@ -1,6 +1,5 @@
-<ul class="gf-category-items">
-<li class="category-item">
+<div class="gf-category-items">
+<div class="category-item">
     <a tabindex="-1" href="<?= user_trailingslashit(get_term_link((int)$cat->term_id)) ?>">
         <?= $cat->name ?></a>
-    <div class="mega-menu row z-depth-1 primary-color-dark" aria-labelledby="navbarDropdownMenuLink2">
-        <div class="row mega-menu__row">
+    <div class="mega-menu" aria-labelledby="navbarDropdownMenuLink2">

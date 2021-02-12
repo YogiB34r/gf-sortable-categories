@@ -1,4 +1,4 @@
-<li class="sub-sub-category-title text-uppercase">
-    <a class="sub-menu-item" href="<?=user_trailingslashit(get_term_link($cat->term_id))?>"><?=
+<div class="sub-sub-category-title">
+    <a class="sub-menu-item" href="<?= user_trailingslashit(get_term_link($cat->term_id)) ?>"><?=
         $cat->name ?></a>
-</li>
+</div>
