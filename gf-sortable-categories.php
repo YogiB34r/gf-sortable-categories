@@ -19,13 +19,16 @@
  * License:     GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
-require_once(plugin_dir_path(__FILE__) . '/../gf-widgets/includes/GF_Cache.php');
+
+use Gf\Util\CategoryFunctions;
+
+require_once(__DIR__ .'/service/CategoryFunctions.php');
 load_plugin_textdomain('gf-sortable-categories', '', plugins_url() . '/gf-sortable-categories/languages');
 function gf_sortable_categories_admin_scripts() {
     if (is_admin()) {
         wp_enqueue_style('jqueri-ui-css', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
-//        wp_enqueue_style('gf-sortable-categories-admin-css', plugins_url() . '/gf-sortable-categories/css/gf-sortable-categories-admin.css');
-//        wp_register_script('sortable-categories-admin-js', plugins_url() . '/gf-sortable-categories/js/sortable-categories-admin.js', array('jquery'), '', true);
+        wp_enqueue_style('gf-sortable-categories-admin-css', plugins_url() . '/gf-sortable-categories/css/gf-sortable-categories-admin.css');
+        wp_register_script('sortable-categories-admin-js', plugins_url() . '/gf-sortable-categories/js/sortable-categories-admin.js', array('jquery'), '', true);
         wp_enqueue_script('sortable-categories-admin-js');
         wp_enqueue_script('jquery-ui-widget');
         wp_enqueue_script('jquery-ui-sortable');
@@ -36,7 +39,7 @@ function gf_sortable_categories_admin_scripts() {
 add_action('admin_enqueue_scripts', 'gf_sortable_categories_admin_scripts');
 add_action('admin_menu', 'gf_sortable_categories_options_create_menu');
 function gf_sortable_categories_options_create_menu() {
-    add_submenu_page('nss-panel','Sortable Categories', 'Sortiranje kategorija', 'administrator', 'sortable_categories_options', 'gf_sortable_categories_options_page', 10);
+    add_menu_page('Sortiranje kategorija', 'Sortiranje kategorija', 'administrator', 'sortable_categories_options', 'gf_sortable_categories_options_page','', 10);
     add_action('admin_init', 'register_gf_sortable_categories_options');
 }
 function register_gf_sortable_categories_options() {
@@ -58,11 +61,13 @@ function gf_reset_category_order() {
 }
 function gf_sortable_categories_options_page() {
     if (isset($_REQUEST['settings-updated'])) {
-        gf_clear_megamenu_cache();
+       // @todo implement caching
+//        gf_clear_megamenu_cache();
     }
     if (isset($_REQUEST['reset-categories'])) {
         gf_reset_category_order();
-        gf_clear_megamenu_cache();
+        //@todo caching
+//        gf_clear_megamenu_cache();
         header("Location: http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]&message=success");
         exit;
     }
@@ -76,9 +81,9 @@ function gf_sortable_categories_options_page() {
 //    if ($uncategorizedCat) {
 //        $uncategorized_id = $uncategorizedCat->term_id;
 //    }
-    $topLevelCats = \Gf\Util\CategoryFunctions::gf_get_top_level_categories($gf_slider_id);
+    $topLevelCats = CategoryFunctions::gf_get_top_level_categories($gf_slider_id);
     foreach ($topLevelCats as $cat) {
-        if ($cat->term_id === 3152) {
+        if ($cat->slug === 'uncategorized') {
             continue;
         }
         $catTermChildren = get_term_children($cat->term_id, 'product_cat');
@@ -96,7 +101,7 @@ function gf_sortable_categories_options_page() {
             ];
 
             foreach ($catTermChildren as $second_level_cat_id) {
-                if (\Gf\Util\CategoryFunctions::gf_check_level_of_category($second_level_cat_id) == 2) {
+                if (CategoryFunctions::gf_check_level_of_category($second_level_cat_id) == 2) {
                     $secondCatTermChildren = get_term_children($second_level_cat_id, 'product_cat');
                     $second_level_cat = get_term($second_level_cat_id, 'product_cat');
                     $product_cats[$cat->term_id]['children'][$second_level_cat_id]['cat'] = [
@@ -285,9 +290,9 @@ function gf_sortable_categories_options_page() {
     </div><!--WRAP-->
     <script type="text/javascript">
         jQuery(document).ready(function () {
-            $('#category-reset').click(function (e) {
+            jQuery('#category-reset').click(function (e) {
                 if (confirm("Da li ste sigurni da želite da resetujete redosled kategorija ?")) {
-                    $('#category-reset').submit();
+                    jQuery('#category-reset').submit();
                 }
             });
         });
@@ -355,7 +360,7 @@ function printMegaMenu() {
             $product_cats[] = get_term($termId, 'product_cat');
         }
     } else {
-        foreach (\Gf\Util\CategoryFunctions::gf_get_top_level_categories($gf_slider_id) as $cat) {
+        foreach (CategoryFunctions::gf_get_top_level_categories($gf_slider_id) as $cat) {
             if ($cat->term_id === 3152) {
                 continue;
             }
@@ -365,7 +370,7 @@ function printMegaMenu() {
             } else {
                 $product_cats[] = $cat;
                 foreach ($catTermChildren as $second_level_cat) {
-                    if (\Gf\Util\CategoryFunctions::gf_check_level_of_category($second_level_cat) == 2) {
+                    if (CategoryFunctions::gf_check_level_of_category($second_level_cat) == 2) {
                         $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
                         if (empty($secondCatTermChildren)) {
                             $product_cats[] = get_term($second_level_cat, 'product_cat');
@@ -398,7 +403,7 @@ function printMegaMenu() {
                 $i++;
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/first-level.php'));
             }
-            $catLevel = \Gf\Util\CategoryFunctions::gf_check_level_of_category($cat->term_id);
+            $catLevel = CategoryFunctions::gf_check_level_of_category($cat->term_id);
             if ($catLevel == 2) {
                 $child_count = count(get_term_children($cat->term_id, 'product_cat'));
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/second-level.php'));
@@ -462,7 +467,7 @@ function printMobileMegaMenu() {
             $product_cats[] = get_term($termId, 'product_cat');
         }
     } else {
-        foreach (\Gf\Util\CategoryFunctions::gf_get_top_level_categories($gf_slider_id) as $cat) {
+        foreach (CategoryFunctions::gf_get_top_level_categories($gf_slider_id) as $cat) {
             if ($cat->term_id === 3152) {
                 continue;
             }
@@ -472,7 +477,7 @@ function printMobileMegaMenu() {
             } else {
                 $product_cats[] = $cat;
                 foreach ($catTermChildren as $second_level_cat) {
-                    if (\Gf\Util\CategoryFunctions::gf_check_level_of_category($second_level_cat) == 2) {
+                    if (CategoryFunctions::gf_check_level_of_category($second_level_cat) == 2) {
                         $secondCatTermChildren = get_term_children($second_level_cat, 'product_cat');
                         if (empty($secondCatTermChildren)) {
                             $product_cats[] = get_term($second_level_cat, 'product_cat');
@@ -503,7 +508,7 @@ function printMobileMegaMenu() {
                 $i++;
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/first-level.php'));
             }
-            $catLevel = \Gf\Util\CategoryFunctions::gf_check_level_of_category($cat->term_id);
+            $catLevel = CategoryFunctions::gf_check_level_of_category($cat->term_id);
             if ($catLevel == 2) {
                 $child_count = count(get_term_children($cat->term_id, 'product_cat'));
                 require(realpath(__DIR__ . '/template-parts/category-megamenu/mobile/second-level.php'));

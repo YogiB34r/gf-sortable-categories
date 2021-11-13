@@ -1,5 +1,5 @@
-jQuery(document).ready(function ($) {
-
+jQuery(document).ready(function () {
+    console.log('radim');
     /********************************************/
     /* AJAX SAVE FORM */
     /********************************************/
@@ -22,33 +22,33 @@ jQuery(document).ready(function ($) {
     /********************************************/
     /* SORTABLE FILTER FIELDS */
     /********************************************/
-    $('.accordion-first-level').accordion({
+    jQuery('.accordion-first-level').accordion({
         collapsible: true,
         header: ">h2",
         heightStyle: "content",
         active:false,
         icons: { "header": "ui-icon-plus", "activeHeader": "ui-icon-minus" }
     });
-    $('.accordion-second-level').accordion({
+    jQuery('.accordion-second-level').accordion({
         collapsible: true,
         header: ">h4",
         heightStyle: "content",
         active:false,
         icons: { "header": "ui-icon-plus", "activeHeader": "ui-icon-minus" }
     });
-    $('.filter-fields-list').sortable({
+    jQuery('.filter-fields-list').sortable({
         handle: "h2",
         axis: 'y',
         cursor: 'move',
         items: 'li',
     });
-    $('.parent-cat-children').sortable({
+    jQuery('.parent-cat-children').sortable({
         handle: "h4",
         axis: 'y',
         cursor: 'move',
         items: 'li',
     });
-    $('.child-cat-children').sortable({
+    jQuery('.child-cat-children').sortable({
         handle: "h5",
         axis: 'y',
         cursor: 'move',
