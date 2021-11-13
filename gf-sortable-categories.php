@@ -39,7 +39,7 @@ function gf_sortable_categories_admin_scripts() {
 add_action('admin_enqueue_scripts', 'gf_sortable_categories_admin_scripts');
 add_action('admin_menu', 'gf_sortable_categories_options_create_menu');
 function gf_sortable_categories_options_create_menu() {
-    add_menu_page('Sortiranje kategorija', 'Sortiranje kategorija', 'administrator', 'sortable_categories_options', 'gf_sortable_categories_options_page','', 10);
+    add_menu_page('Sortiranje kategorija', 'Sortiranje kategorija', 'manage_options', 'sortable_categories_options', 'gf_sortable_categories_options_page','', 20);
     add_action('admin_init', 'register_gf_sortable_categories_options');
 }
 function register_gf_sortable_categories_options() {
