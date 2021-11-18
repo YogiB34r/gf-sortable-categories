@@ -1,5 +1,4 @@
 jQuery(document).ready(function () {
-    console.log('radim');
     /********************************************/
     /* AJAX SAVE FORM */
     /********************************************/
